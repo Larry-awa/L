@@ -3,174 +3,717 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>默契问卷</title>
+    <meta name="author" content="Larry私人问卷">
+    <title>朋友双面问卷</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .container { max-width: 600px; width: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border-radius: 24px; padding: 24px 20px 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.5); }
-        .header { text-align: center; padding-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.03); margin-bottom: 18px; }
-        .header h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; letter-spacing: 2px; }
-        .header p { font-size: 13px; color: #888; margin-top: 4px; }
-        .progress { height: 4px; background: #e8e8e8; border-radius: 4px; margin-bottom: 24px; overflow: hidden; }
-        .progress-bar { height: 100%; width: 0%; background: #2563eb; transition: width 0.3s; }
+        body { background: #f5f7fa; padding: 20px; display: flex; justify-content: center; position: relative; }
+        body::before { content: "专属问卷 Larry-wa"; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; font-weight: bold; color: rgba(0,0,0,0.015); white-space: nowrap; z-index: -1; pointer-events: none; letter-spacing: 10px; }
+        .container { max-width: 600px; width: 100%; background: #fff; border-radius: 24px; padding: 24px 20px 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); position: relative; z-index: 1; }
+        
+        .header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #eee; margin-bottom: 20px; }
+        .header h1 { font-size: 24px; font-weight: 600; color: #1a1a1a; letter-spacing: 1px; }
+        .header p { font-size: 14px; color: #888; margin-top: 6px; }
+        
+        /* 顶部切换标签页 */
+        .mode-switch { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        .mode-btn { border: 1px solid #d0d7de; border-radius: 40px; padding: 8px 20px; background: #fff; color: #333; font-weight: 500; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .mode-btn.active { background: #2b7aff; color: #fff; border-color: #2b7aff; }
+        .mode-btn:hover:not(.active) { background: #f0f2f5; }
+        .mode-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+        .progress { height: 4px; background: #e8e8e8; border-radius: 4px; margin-bottom: 28px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; background: #2b7aff; transition: width 0.3s; }
         
         .question-card { display: none; animation: fade 0.3s ease; }
         .question-card.active { display: block; }
-        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         
         .q-title { font-size: 17px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
-        .q-hint { font-size: 13px; color: #2563eb; font-weight: 500; margin-bottom: 18px; display: block; }
+        .q-hint { font-size: 13px; color: #2b7aff; font-weight: 500; margin-bottom: 18px; display: block; }
+        .q-hint.view-mode { color: #888; }
         
         .options { display: flex; flex-direction: column; gap: 10px; }
-        .option-item { display: flex; align-items: center; background: #f8fafc; border: 1.5px solid transparent; border-radius: 12px; padding: 12px 16px; cursor: pointer; transition: 0.2s; }
-        .option-item:hover { background: #f1f5f9; }
-        .option-item.selected { background: #eff6ff; border-color: #2563eb; }
-        .option-item.disabled { opacity: 0.4; pointer-events: none; }
-        .option-item .checkbox { width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 4px; margin-right: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; background: #fff; }
-        .option-item.selected .checkbox { background: #2563eb; border-color: #2563eb; }
+        .option-item { display: flex; align-items: center; background: #f8f9fa; border: 1.5px solid transparent; border-radius: 12px; padding: 12px 16px; cursor: pointer; transition: 0.2s; }
+        .option-item:hover { background: #f0f2f5; }
+        .option-item.selected { background: #eaf2ff; border-color: #2b7aff; }
+        .option-item.disabled, .option-item.view-mode { pointer-events: none; opacity: 0.6; }
+        .option-item.view-mode.selected { opacity: 1; border-color: #a0c4ff; background: #eaf2ff; }
+        .option-item .checkbox { width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 4px; margin-right: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; background: #fff; }
+        .option-item.selected .checkbox { background: #2b7aff; border-color: #2b7aff; }
         .option-item.selected .checkbox::after { content: '✓'; color: #fff; font-size: 14px; font-weight: bold; }
-        .option-item .text { font-size: 15px; color: #1e293b; }
+        .option-item .text { font-size: 15px; color: #222; }
 
-        .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; gap: 12px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
         .btn { border: none; border-radius: 40px; padding: 12px 28px; font-size: 15px; font-weight: 500; cursor: pointer; transition: 0.2s; }
-        .btn-prev { background: #f1f5f9; color: #475569; }
+        .btn-prev { background: #f0f0f0; color: #555; }
         .btn-prev:disabled { opacity: 0.3; cursor: not-allowed; }
-        .btn-next { background: #2563eb; color: #fff; flex: 1; }
+        .btn-next { background: #2b7aff; color: #fff; flex: 1; }
         .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-submit { background: #f97316; color: #fff; flex: 1; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2); }
-        .step { font-size: 14px; color: #94a3b8; min-width: 60px; text-align: center; }
+        .btn-submit { background: #ff6b4a; color: #fff; flex: 1; }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .step { font-size: 14px; color: #999; min-width: 60px; text-align: center; }
 
         .result-page { display: none; animation: fade 0.4s; }
         .result-page.active { display: block; }
-        .result-item { background: #f8fafc; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; border-left: 4px solid #2563eb; }
+        .result-item { background: #f8f9fa; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; border-left: 4px solid #2b7aff; }
         .result-item .r-q { font-weight: 600; font-size: 15px; color: #1a1a1a; margin-bottom: 6px; }
-        .result-item .r-a { color: #475569; font-size: 14px; line-height: 1.6; }
+        .result-item .r-a { color: #555; font-size: 14px; line-height: 1.6; }
         
-        .action-btns { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
-        .btn-copy { background: #1e293b; color: #fff; flex: 1; justify-content: center; display: flex; align-items: center; }
-        .btn-copy:hover { background: #0f172a; }
-        .btn-restart { background: #e2e8f0; color: #1a1a1a; flex: 1; }
-
-        .footer { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.03); font-size: 13px; color: #94a3b8; }
-        .footer .highlight { color: #2563eb; font-weight: bold; font-size: 14px; }
+        .btn-share { background: #2b7aff; color: #fff; width: 100%; margin-top: 10px; text-align: center; }
+        .btn-restart { background: #eef2f7; color: #1a1a1a; width: 100%; margin-top: 10px; }
+        
+        .view-mode-banner { display: none; background: #f9f1e6; padding: 8px 12px; border-radius: 12px; font-size: 13px; color: #8c6b4a; margin-bottom: 16px; text-align: center; border: 1px solid #e7d5c0; }
+        
+        .footer-note { text-align: center; margin-top: 30px; font-size: 12px; color: #dcdcdc; letter-spacing: 0.3px; }
         @media (max-width: 480px) { .container { padding: 16px; } }
     </style>
 </head>
 <body>
 <div class="container" id="app">
-    <div class="header">
-        <h1>✦ 默契测试</h1>
-        <p>选出最贴合的感受，不记名，纯走心</p>
+    <div class="header"><h1>✧ 朋友双面问卷</h1><p>两套问卷，看清彼此</p></div>
+    
+    <!-- 模式切换 -->
+    <div class="mode-switch">
+        <button class="mode-btn active" id="modeMe" onclick="switchMode('me')">📝 朋友眼中的我</button>
+        <button class="mode-btn" id="modeYou" onclick="switchMode('you')">📝 朋友眼中的自己</button>
     </div>
+
+    <div class="view-mode-banner" id="viewBanner">🔒 当前为“已答结果”查看模式，无法修改</div>
+
     <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
     <div id="questionsWrapper">
         <div id="questionContainer"></div>
         <div class="nav">
             <button class="btn btn-prev" id="prevBtn" disabled>上一题</button>
             <button class="btn btn-next" id="nextBtn">下一题</button>
-            <span class="step" id="stepIndicator">1 / 10</span>
+            <span class="step" id="stepIndicator">1 / 15</span>
         </div>
     </div>
-    
     <div class="result-page" id="resultPage">
         <div id="resultContent"></div>
-        <div class="action-btns">
-            <button class="btn btn-copy" id="copyBtn"><span>📋</span> 复制结果发给TA</button>
-            <button class="btn btn-restart" id="restartBtn">再测一次</button>
-        </div>
+        <button class="btn btn-share" id="shareBtn">📋 生成只读链接（复制分享）</button>
+        <button class="btn btn-restart" id="restartBtn">重新测一次</button>
     </div>
-
-    <div class="footer">问卷设计：<span class="highlight">Larry_awa</span></div>
+    <div class="footer-note">· 问卷设计 Larry-awa</div>
 </div>
-<script>
-const questions = [
-    { id:1, text:'你对我第一印象是什么？', max:3, options:['清冷，不易接近','温和，感觉舒适','疏离，对外界淡漠','成熟，身上有故事','神秘，让人捉摸不透','幽默，自带亲和力'] },
-    { id:2, text:'你觉得我的性格底色偏向？', max:2, options:['理智，看问题通透','随性，向往自由','热烈，但内心敏感','平和，像温水一般','深邃，带着些许冷感'] },
-    { id:3, text:'熟了之后觉得我怎样？', max:2, options:['原来是话痨','相处更默契了','变得比较依赖人','反而更加客气了'] },
-    { id:4, text:'用哪种氛围形容你最贴切？', max:1, options:['静，如水般温和','冷，带着忧郁感','明，清醒且现实','暖，自带亲和力'] },
-    { id:5, text:'我身上最想吐槽的点？', max:5, options:['太会照顾人，忘了自己','对谁都彬彬有礼，分不清远近','消息常已读不回，行踪成谜','表面沉静，内心却十分跳脱','执念太深，容易钻牛角尖','情绪波动大，忽冷忽热','固执己见，听不进劝'] },
-    { id:6, text:'你觉得你自己是怎样的人？', max:3, options:['平稳，情绪不易起伏','敏锐，共情力很强','务实，目标感清晰','松弛，以真诚待人','矛盾，理性和感性交织','佛系，顺其自然'] },
-    { id:7, text:'周末约饭你选哪？', max:2, options:['安静角落，聊会儿天','市井街头，烟火气','咖啡馆或艺术展','随便，你来定就好'] },
-    { id:8, text:'我们俩性格相似吗？', max:2, options:['很像，像照镜子','互补，毫无违和','不同，但相处舒服','太像，总爱较劲'] },
-    { id:9, text:'初见哪个细节最深刻？', max:2, options:['当时的穿着打扮','说话时的语气','不经意的小动作','初次对话的氛围'] },
-    { id:10, text:'别人问起我，你怎么评价？', max:5, options:['人际广泛，却难深交','值得信赖和倾诉','温和善良，仅此而已','有一种无法定义的独特感','无可奉告，别问太多','是一面镜子，照见你自己','ta啊，活着就是个谜'] }
-];
-let current = 0, answers = Array.from({length:questions.length}, ()=>[]);
-const qc = document.getElementById('questionContainer'), pb = document.getElementById('progressBar'), prev = document.getElementById('prevBtn'), next = document.getElementById('nextBtn'), step = document.getElementById('stepIndicator'), resPage = document.getElementById('resultPage'), wrap = document.getElementById('questionsWrapper'), copyBtn = document.getElementById('copyBtn');
 
-function render(idx){
-    const q = questions[idx], sel = answers[idx];
-    let html = `<div class="question-card active"><div class="q-title">${idx+1}. ${q.text}</div><span class="q-hint">最多选 ${q.max} 项</span><div class="options">`;
+<script>
+console.log('%c 👻 此页面由 Larry-awa 制作，请勿提取源码复刻。', 'font-size: 16px; color: #2b7aff; font-weight: bold;');
+
+// -------------------
+// 1. 两套数据
+// -------------------
+// 第一套：朋友眼中的我（15题）
+const questionsMe = [
+    { id:1, text:'你对我第一印象是什么？', max:2, options:['清冷，不易接近','温和，感觉舒适','疏离，对外界淡漠','成熟，身上有故事','幽默，自带亲和力'] },
+    { id:2, text:'你觉得我的性格底色偏向？', max:2, options:['理智，看问题通透','随性，向往自由','热烈，但内心敏感','平和，像温水一般'] },
+    { id:3, text:'熟了之后觉得我怎样？', max:2, options:['原来是话痨','相处更默契了','变得比较依赖人','反而更加客气了'] },
+    { id:4, text:'用哪种氛围形容我最贴切？', max:1, options:['静，如水般温和','冷，带着忧郁感','明，清醒且现实','暖，自带亲和力'] },
+    { id:5, text:'我身上最想吐槽的点？', max:4, options:['太会照顾人，忘了自己','对谁都彬彬有礼，分不清远近','消息常已读不回，行踪成谜','表面沉静，内心却十分跳脱','执念太深，容易钻牛角尖','情绪波动大，忽冷忽热','固执己见，听不进劝'] },
+    { id:6, text:'我交朋友的核心原则是什么？', max:2, options:['宁缺毋滥，只交投缘的','随缘，合得来就行','看重真诚，要能交心','包容，来者不拒'] },
+    { id:7, text:'周末约饭你选哪？', max:1, options:['安静角落，聊会儿天','市井街头，烟火气','咖啡馆或艺术展','随便，你来定就好'] },
+    { id:8, text:'我们俩性格相似吗？', max:1, options:['很像，像照镜子','互补，毫无违和','不同，但相处舒服','太像，总爱较劲'] },
+    { id:9, text:'初见哪个细节最深刻？', max:1, options:['当时的穿着打扮','说话时的语气','不经意的小动作','初次对话的氛围'] },
+    { id:10, text:'别人问起我，你怎么评价？', max:4, options:['人际广泛，却难深交','值得信赖和倾诉','温和善良，仅此而已','有一种无法定义的独特感','无可奉告，别问太多','是一面镜子，照见你自己','ta啊，活着就是个谜'] },
+    { id:11, text:'我骨子里最固执的地方是？', max:2, options:['对某些事情的底线和原则','日常习惯和个人的节奏','自信，觉得自己肯定是对的','消费和理财的观念'] },
+    { id:12, text:'如果我有压力，通常我会？', max:2, options:['一个人默默消化','找最信任的朋友倾诉','出去玩、吃东西转移注意力','直接躺平，什么都不干'] },
+    { id:13, text:'我身上最让你觉得特别的地方是？', max:2, options:['偶尔看事很透彻','私底下挺有意思','有独特的小众爱好','对特定事物非常执着'] },
+    { id:14, text:'在社交圈里我通常扮演什么角色？', max:2, options:['活跃气氛的开心果','默默倾听的树洞','拿主意的定海神针','随波逐流的摸鱼选手'] },
+    { id:15, text:'我最大的反差点在哪里？', max:2, options:['表面社恐，熟了话痨','表面随和，内心有主见','口头摆烂，背后努力','对别人温柔，对自己很狠'] }
+];
+
+// 第二套：朋友眼中的自己（20题，含“喜欢的颜色”）
+const questionsYou = [
+    { id:1, text:'你觉得你自己是怎样的一个人？', max:2, options:['随遇而安，情绪平稳','感性敏锐，共情力强','目标明确，清醒务实','松弛随缘，主打真诚'] },
+    { id:2, text:'用哪种氛围形容你自己最贴切？', max:1, options:['静，如水般温和','冷，带着忧郁感','明，清醒且现实','暖，自带亲和力'] },
+    { id:3, text:'周末休息时你最喜欢怎么过？', max:2, options:['宅家休息，恢复元气','约朋友出门聚会','户外散步或运动','看书、打游戏等独处'] },
+    { id:4, text:'你最喜欢的颜色是什么？', max:2, options:['蓝/绿，清新自然','橙/红，温暖热烈','黑/白，纯粹极简','粉/紫，温柔梦幻'] },
+    { id:5, text:'你喜欢什么样的食物？', max:3, options:['麻辣鲜香的重口味','清淡鲜美的日料或海鲜','街头巷尾的烟火小吃','简单治愈的家常菜','各类甜品和奶茶'] },
+    { id:6, text:'遇到压力或者烦心事时，你通常怎么做？', max:3, options:['独自安静消化','找最信任的朋友倾诉','运动或外出发泄','睡觉或转移注意力'] },
+    { id:7, text:'你交朋友最看重对方的什么？', max:3, options:['真诚不虚伪','情绪稳定','有幽默感','上进有思想'] },
+    { id:8, text:'你在社交场合中通常是哪种状态？', max:1, options:['主动活跃气氛','安静倾听观察','随和但保持距离','偶尔会局促尴尬'] },
+    { id:9, text:'如果用一种动物形容自己，你选哪个？', max:1, options:['猫：独立又柔软','狗：热情且忠诚','鹿：温和且敏感','鹰：冷静且敏锐'] },
+    { id:10, text:'你对未来的生活最期待什么？', max:3, options:['财务自由，不再为钱愁','家庭圆满，平安顺遂','自我实现，追寻热爱','随遇而安，顺其自然'] },
+    { id:11, text:'你觉得自己的缺点是什么？', max:3, options:['容易拖延','容易多想，内耗','脾气有点急','不懂拒绝别人'] },
+    { id:12, text:'你更喜欢哪种沟通方式？', max:1, options:['当面直说','微信文字','电话语音','委婉暗示'] },
+    { id:13, text:'你最想尝试的新爱好是什么？', max:3, options:['摄影或拍视频','烹饪或烘焙','学习乐器或唱歌','健身或攀岩'] },
+    { id:14, text:'你对待感情的态度是怎样的？', max:1, options:['灵魂契合，偏爱共鸣','细水长流，踏实陪伴','顺其自然，缘分天定','共同进步，互相成就'] },
+    { id:15, text:'你更喜欢团队合作还是单打独斗？', max:1, options:['团队合作','独立完成','看情况而定'] },
+    { id:16, text:'你近期最大的烦恼来源于？', max:3, options:['工作或学业压力','经济状况','人际关系','身体健康'] },
+    { id:17, text:'你理想中的周末是什么样的？', max:3, options:['睡到自然醒','做手工或兴趣爱好','和好朋友一起','去户外或近郊'] },
+    { id:18, text:'用一句话形容你现在的状态？', max:1, options:['稳步向前，踏实充实','波澜不惊，平淡如水','充满迷茫，仍在探索','舒适自在，享受当下'] },
+    { id:19, text:'你最希望未来自己拥有哪种能力？', max:1, options:['抗压和情绪稳定','表达和社交能力','创造力和执行力','面对未知的勇气'] },
+    { id:20, text:'你最欣赏哪种人生哲学？', max:1, options:['活在当下，及时行乐','规划未来，稳步积累','顺其自然，不强求','尽力而为，不留遗憾'] }
+];
+
+// -------------------
+// 2. 核心引擎
+// -------------------
+let currentMode = 'me';
+let currentIndex = 0;
+let answers = [];
+let isViewMode = false; // 是不是只读模式
+
+function getQuestions() { return currentMode === 'me' ? questionsMe : questionsYou; }
+
+function resetAnswers() { answers = Array.from({length: getQuestions().length}, ()=>[]); }
+
+function switchMode(mode) {
+    if(mode === currentMode || isViewMode) return; // 只读模式下禁止切换
+    currentMode = mode;
+    document.getElementById('modeMe').classList.toggle('active', mode === 'me');
+    document.getElementById('modeYou').classList.toggle('active', mode === 'you');
+    
+    currentIndex = 0;
+    resetAnswers();
+    document.getElementById('resultPage').classList.remove('active');
+    document.getElementById('questionsWrapper').style.display = 'block';
+    
+    const submitBtn = document.querySelector('.btn-submit');
+    if(submitBtn) submitBtn.style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'inline-flex';
+    
+    renderQuestion(0);
+    updateButtons();
+    updateProgress();
+}
+
+const qc = document.getElementById('questionContainer'), pb = document.getElementById('progressBar');
+const prev = document.getElementById('prevBtn'), next = document.getElementById('nextBtn'), step = document.getElementById('stepIndicator');
+const resPage = document.getElementById('resultPage'), wrap = document.getElementById('questionsWrapper');
+const viewBanner = document.getElementById('viewBanner');
+
+function renderQuestion(idx){
+    const qs = getQuestions();
+    const q = qs[idx], sel = answers[idx];
+    let html = `<div class="question-card active"><div class="q-title">${idx+1}. ${q.text}</div><span class="q-hint ${isViewMode?'view-mode':''}">${isViewMode?'已选答案，仅可查看':'最多选 ' + q.max + ' 项'}</span><div class="options">`;
     q.options.forEach((o, i) => {
         const v = o, checked = sel.includes(v);
-        html += `<div class="option-item ${checked?'selected':''}" data-idx="${idx}" data-val="${v}"><div class="checkbox"></div><span class="text">${v}</span></div>`;
+        // 如果是只读模式，添加 view-mode 类
+        let cls = checked?'selected':'';
+        if(isViewMode) cls += ' view-mode';
+        html += `<div class="option-item ${cls}" data-idx="${idx}" data-val="${v}"><div class="checkbox"></div><span class="text">${v}</span></div>`;
     });
     html += `</div></div>`;
     qc.innerHTML = html;
-    step.textContent = `${idx+1} / ${questions.length}`;
-    updateUI();
-    document.querySelectorAll('.option-item').forEach(el => {
-        el.addEventListener('click', function() {
-            const idx = parseInt(this.dataset.idx), val = this.dataset.val, max = questions[idx].max;
-            let arr = answers[idx];
-            if(arr.includes(val)){
-                answers[idx] = arr.filter(v => v !== val);
-            } else {
-                if(arr.length >= max) { alert(`此题最多只能选 ${max} 项哦`); return; }
-                answers[idx] = [...arr, val];
-            }
-            render(idx);
+    step.textContent = `${idx+1} / ${qs.length}`;
+    
+    if(!isViewMode) {
+        updateButtons();
+        // 绑定点击事件（普通模式）
+        document.querySelectorAll('.option-item').forEach(el => {
+            el.addEventListener('click', function() {
+                const qsI = getQuestions();
+                const idx = parseInt(this.dataset.idx), val = this.dataset.val, max = qsI[idx].max;
+                let arr = answers[idx];
+                if(arr.includes(val)){
+                    answers[idx] = arr.filter(v => v !== val);
+                } else {
+                    if(arr.length >= max) { alert(`此题最多只能选 ${max} 项哦`); return; }
+                    answers[idx] = [...arr, val];
+                }
+                renderQuestion(idx);
+            });
         });
-    });
-    const cnt = answers.filter(a => a.length > 0).length;
-    pb.style.width = Math.min((cnt/questions.length)*100, 100) + '%';
+    } else {
+        // 只读模式下的状态
+        document.getElementById('prevBtn').disabled = true;
+        document.getElementById('nextBtn').style.display = 'none';
+        document.querySelector('.btn-submit')?.remove(); // 移除提交按钮
+        document.getElementById('modeMe').disabled = true;
+        document.getElementById('modeYou').disabled = true;
+    }
+    updateProgress();
 }
 
-function updateUI(){
-    const has = answers[current].length > 0;
-    prev.disabled = current === 0;
-    if(current === questions.length - 1){
+function updateButtons(){
+    const qs = getQuestions();
+    const has = answers[currentIndex].length > 0;
+    prev.disabled = currentIndex === 0;
+    if(currentIndex === qs.length - 1){
         next.style.display = 'none';
         let btn = document.querySelector('.btn-submit');
-        if(!btn){ btn = document.createElement('button'); btn.className = 'btn btn-submit'; btn.textContent = '提交问卷'; const nav = document.querySelector('.nav'); nav.insertBefore(btn, document.getElementById('stepIndicator')); btn.onclick = submit; }
-        btn.style.display = 'inline-flex'; btn.disabled = !has;
+        if(!btn){ 
+            btn = document.createElement('button'); 
+            btn.className = 'btn btn-submit'; 
+            btn.textContent = '提交并生成结果'; 
+            const nav = document.querySelector('.nav'); 
+            nav.insertBefore(btn, document.getElementById('stepIndicator')); 
+            btn.onclick = submit; 
+        }
+        btn.style.display = 'inline-flex'; 
+        btn.disabled = !has;
     } else {
         const btn = document.querySelector('.btn-submit');
         if(btn) btn.style.display = 'none';
-        next.style.display = 'inline-flex'; next.disabled = !has;
+        next.style.display = 'inline-flex'; 
+        next.disabled = !has;
     }
 }
+
+function updateProgress(){
+    const qs = getQuestions();
+    const cnt = answers.filter(a => a.length > 0).length;
+    pb.style.width = Math.min((cnt/qs.length)*100, 100) + '%';
+}
+
 function submit(){
+    const qs = getQuestions();
     if(answers.some(a => a.length === 0)){ alert('还有题目没选完，请检查'); return; }
     wrap.style.display = 'none'; resPage.classList.add('active');
     let html = '';
-    questions.forEach((q, i) => {
+    const modeName = currentMode === 'me' ? '第一套·朋友眼中的我' : '第二套·朋友眼中的自己';
+    html += `<div style="text-align:center;margin-bottom:16px;font-weight:600;color:#2b7aff;">✦ ${modeName} 结果 ✦</div>`;
+    qs.forEach((q, i) => {
         const ans = answers[i].join('、') || '未作答';
         html += `<div class="result-item"><div class="r-q">${i+1}. ${q.text}</div><div class="r-a">${ans}</div></div>`;
     });
     document.getElementById('resultContent').innerHTML = html;
+    
+    // 设置生成链接按钮
+    document.getElementById('shareBtn').onclick = function() {
+        // 把状态加密成Base64放入URL
+        const state = { type: currentMode, ans: answers };
+        const encoded = btoa(JSON.stringify(state));
+        // 当前网址 + ?view=
+        const shareUrl = window.location.origin + window.location.pathname + '?view=' + encodeURIComponent(encoded);
+        
+        // 复制到剪贴板
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert('✅ 只读结果链接已复制！\n发到微信/其他应用，朋友打开就能看到你的答案。');
+            }).catch(() => {
+                prompt('复制失败，请手动复制下面的链接：', shareUrl);
+            });
+        } else {
+            prompt('复制失败，请手动复制下面的链接：', shareUrl);
+        }
+    };
 }
-prev.onclick = ()=> { if(current>0){ current--; render(current); } };
-next.onclick = ()=> { if(current<questions.length-1 && answers[current].length>0){ current++; render(current); } };
-document.getElementById('restartBtn').onclick = ()=> { answers = Array.from({length:questions.length}, ()=>[]); current=0; resPage.classList.remove('active'); wrap.style.display='block'; render(0); pb.style.width = '0%'; };
 
-// 【新增功能】一键复制结果发给作者
-copyBtn.onclick = async ()=>{
-    let text = `✦ 默契测试结果 ✦\n`;
-    questions.forEach((q, i) => {
-        const ans = answers[i].join('、') || '未选';
-        text += `\n${i+1}. ${q.text}\n  → ${ans}`;
-    });
-    text += `\n\n--- 复制这条消息直接发给TA！`;
-    try {
-        await navigator.clipboard.writeText(text);
-        alert('✅ 复制成功！请直接粘贴发给TA的微信吧！');
-    } catch {
-        alert('⚠️ 复制失败，请手动长按上面的文字复制。');
+prev.onclick = ()=> { if(currentIndex>0 && !isViewMode){ currentIndex--; renderQuestion(currentIndex); } };
+next.onclick = ()=> { if(currentIndex<getQuestions().length-1 && answers[currentIndex].length>0 && !isViewMode){ currentIndex++; renderQuestion(currentIndex); } };
+document.getElementById('restartBtn').onclick = ()=> { if(!isViewMode){ resetAnswers(); currentIndex=0; resPage.classList.remove('active'); wrap.style.display='block'; renderQuestion(0); pb.style.width = '0%'; } };
+
+// -------------------
+// 3. 启动与读取URL参数
+// -------------------
+function init() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewData = urlParams.get('view');
+    
+    if (viewData) {
+        try {
+            const decoded = JSON.parse(atob(decodeURIComponent(viewData)));
+            if (decoded.type && decoded.ans) {
+                isViewMode = true;
+                viewBanner.style.display = 'block';
+                currentMode = decoded.type;
+                // 还原选择项
+                const qs = getQuestions();
+                answers = decoded.ans;
+                // 修正答案数组长度（防错）
+                if(answers.length !== qs.length) {
+                    // 如果解析出的答案长度不对，重新填充空
+                    const newAns = Array.from({length: qs.length}, ()=>[]);
+                    for(let i=0; i<Math.min(answers.length, qs.length); i++) {
+                        // 只保留有效选项
+                        newAns[i] = answers[i].filter(v => qs[i].options.includes(v));
+                    }
+                    answers = newAns;
+                }
+                // 渲染只读页
+                document.getElementById('modeMe').classList.toggle('active', currentMode === 'me');
+                document.getElementById('modeYou').classList.toggle('active', currentMode === 'you');
+                document.getElementById('modeMe').disabled = true;
+                document.getElementById('modeYou').disabled = true;
+                
+                // 隐藏导航，展示结果
+                document.getElementById('questionsWrapper').style.display = 'block';
+                document.querySelector('.nav').style.display = 'none'; // 隐藏上一题下一题
+                // 模拟提交效果，直接展示结果页
+                wrap.style.display = 'none'; resPage.classList.add('active');
+                let html = '';
+                const modeName = currentMode === 'me' ? '第一套·朋友眼中的我' : '第二套·朋友眼中的自己';
+                html += `<div style="text-align:center;margin-bottom:16px;font-weight:600;color:#2b7aff;">✦ ${modeName} 已答结果 ✦</div>`;
+                qs.forEach((q, i) => {
+                    const ans = answers[i].join('、') || '未作答';
+                    html += `<div class="result-item"><div class="r-q">${i+1}. ${q.text}</div><div class="r-a">${ans}</div></div>`;
+                });
+                document.getElementById('resultContent').innerHTML = html;
+                document.getElementById('shareBtn').style.display = 'none'; // 只读模式下隐藏生成按钮
+                return;
+            }
+        } catch (e) {
+            console.log('解析只读链接失败，进入普通模式');
+        }
     }
-};
+    
+    // 普通模式初始化
+    resetAnswers();
+    renderQuestion(0);
+}
+init();
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="author" content="Larry私人问卷">
+    <title>朋友双面问卷</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background: #f5f7fa; padding: 20px; display: flex; justify-content: center; position: relative; }
+        body::before { content: "专属问卷 Larry-wa"; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; font-weight: bold; color: rgba(0,0,0,0.015); white-space: nowrap; z-index: -1; pointer-events: none; letter-spacing: 10px; }
+        .container { max-width: 600px; width: 100%; background: #fff; border-radius: 24px; padding: 24px 20px 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); position: relative; z-index: 1; }
+        
+        .header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #eee; margin-bottom: 20px; }
+        .header h1 { font-size: 24px; font-weight: 600; color: #1a1a1a; letter-spacing: 1px; }
+        .header p { font-size: 14px; color: #888; margin-top: 6px; }
+        
+        /* 顶部切换标签页 */
+        .mode-switch { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        .mode-btn { border: 1px solid #d0d7de; border-radius: 40px; padding: 8px 20px; background: #fff; color: #333; font-weight: 500; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .mode-btn.active { background: #2b7aff; color: #fff; border-color: #2b7aff; }
+        .mode-btn:hover:not(.active) { background: #f0f2f5; }
+        .mode-btn:disabled { opacity: 0.5; pointer-events: none; }
 
-render(0);
+        .progress { height: 4px; background: #e8e8e8; border-radius: 4px; margin-bottom: 28px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; background: #2b7aff; transition: width 0.3s; }
+        
+        .question-card { display: none; animation: fade 0.3s ease; }
+        .question-card.active { display: block; }
+        @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .q-title { font-size: 17px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
+        .q-hint { font-size: 13px; color: #2b7aff; font-weight: 500; margin-bottom: 18px; display: block; }
+        .q-hint.view-mode { color: #888; }
+        
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        .option-item { display: flex; align-items: center; background: #f8f9fa; border: 1.5px solid transparent; border-radius: 12px; padding: 12px 16px; cursor: pointer; transition: 0.2s; }
+        .option-item:hover { background: #f0f2f5; }
+        .option-item.selected { background: #eaf2ff; border-color: #2b7aff; }
+        .option-item.disabled, .option-item.view-mode { pointer-events: none; opacity: 0.6; }
+        .option-item.view-mode.selected { opacity: 1; border-color: #a0c4ff; background: #eaf2ff; }
+        .option-item .checkbox { width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 4px; margin-right: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; background: #fff; }
+        .option-item.selected .checkbox { background: #2b7aff; border-color: #2b7aff; }
+        .option-item.selected .checkbox::after { content: '✓'; color: #fff; font-size: 14px; font-weight: bold; }
+        .option-item .text { font-size: 15px; color: #222; }
+
+        .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+        .btn { border: none; border-radius: 40px; padding: 12px 28px; font-size: 15px; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .btn-prev { background: #f0f0f0; color: #555; }
+        .btn-prev:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-next { background: #2b7aff; color: #fff; flex: 1; }
+        .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-submit { background: #ff6b4a; color: #fff; flex: 1; }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .step { font-size: 14px; color: #999; min-width: 60px; text-align: center; }
+
+        .result-page { display: none; animation: fade 0.4s; }
+        .result-page.active { display: block; }
+        .result-item { background: #f8f9fa; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; border-left: 4px solid #2b7aff; }
+        .result-item .r-q { font-weight: 600; font-size: 15px; color: #1a1a1a; margin-bottom: 6px; }
+        .result-item .r-a { color: #555; font-size: 14px; line-height: 1.6; }
+        
+        .btn-share { background: #2b7aff; color: #fff; width: 100%; margin-top: 10px; text-align: center; }
+        .btn-restart { background: #eef2f7; color: #1a1a1a; width: 100%; margin-top: 10px; }
+        
+        .view-mode-banner { display: none; background: #f9f1e6; padding: 8px 12px; border-radius: 12px; font-size: 13px; color: #8c6b4a; margin-bottom: 16px; text-align: center; border: 1px solid #e7d5c0; }
+        
+        .footer-note { text-align: center; margin-top: 30px; font-size: 12px; color: #dcdcdc; letter-spacing: 0.3px; }
+        @media (max-width: 480px) { .container { padding: 16px; } }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="header"><h1>✧ 朋友双面问卷</h1><p>两套问卷，看清彼此</p></div>
+    
+    <!-- 模式切换 -->
+    <div class="mode-switch">
+        <button class="mode-btn active" id="modeMe" onclick="switchMode('me')">📝 朋友眼中的我</button>
+        <button class="mode-btn" id="modeYou" onclick="switchMode('you')">📝 朋友眼中的自己</button>
+    </div>
+
+    <div class="view-mode-banner" id="viewBanner">🔒 当前为“已答结果”查看模式，无法修改</div>
+
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    <div id="questionsWrapper">
+        <div id="questionContainer"></div>
+        <div class="nav">
+            <button class="btn btn-prev" id="prevBtn" disabled>上一题</button>
+            <button class="btn btn-next" id="nextBtn">下一题</button>
+            <span class="step" id="stepIndicator">1 / 15</span>
+        </div>
+    </div>
+    <div class="result-page" id="resultPage">
+        <div id="resultContent"></div>
+        <button class="btn btn-share" id="shareBtn">📋 生成只读链接（复制分享）</button>
+        <button class="btn btn-restart" id="restartBtn">重新测一次</button>
+    </div>
+    <div class="footer-note">· 问卷设计 Larry-wa</div>
+</div>
+
+<script>
+console.log('%c 👻 此页面由 Larry-wa 制作，请勿提取源码复刻。', 'font-size: 16px; color: #2b7aff; font-weight: bold;');
+
+// -------------------
+// 1. 两套数据
+// -------------------
+// 第一套：朋友眼中的我（15题）
+const questionsMe = [
+    { id:1, text:'你对我第一印象是什么？', max:2, options:['清冷，不易接近','温和，感觉舒适','疏离，对外界淡漠','成熟，身上有故事','幽默，自带亲和力'] },
+    { id:2, text:'你觉得我的性格底色偏向？', max:2, options:['理智，看问题通透','随性，向往自由','热烈，但内心敏感','平和，像温水一般'] },
+    { id:3, text:'熟了之后觉得我怎样？', max:2, options:['原来是话痨','相处更默契了','变得比较依赖人','反而更加客气了'] },
+    { id:4, text:'用哪种氛围形容我最贴切？', max:1, options:['静，如水般温和','冷，带着忧郁感','明，清醒且现实','暖，自带亲和力'] },
+    { id:5, text:'我身上最想吐槽的点？', max:4, options:['太会照顾人，忘了自己','对谁都彬彬有礼，分不清远近','消息常已读不回，行踪成谜','表面沉静，内心却十分跳脱','执念太深，容易钻牛角尖','情绪波动大，忽冷忽热','固执己见，听不进劝'] },
+    { id:6, text:'我交朋友的核心原则是什么？', max:2, options:['宁缺毋滥，只交投缘的','随缘，合得来就行','看重真诚，要能交心','包容，来者不拒'] },
+    { id:7, text:'周末约饭你选哪？', max:1, options:['安静角落，聊会儿天','市井街头，烟火气','咖啡馆或艺术展','随便，你来定就好'] },
+    { id:8, text:'我们俩性格相似吗？', max:1, options:['很像，像照镜子','互补，毫无违和','不同，但相处舒服','太像，总爱较劲'] },
+    { id:9, text:'初见哪个细节最深刻？', max:1, options:['当时的穿着打扮','说话时的语气','不经意的小动作','初次对话的氛围'] },
+    { id:10, text:'别人问起我，你怎么评价？', max:4, options:['人际广泛，却难深交','值得信赖和倾诉','温和善良，仅此而已','有一种无法定义的独特感','无可奉告，别问太多','是一面镜子，照见你自己','ta啊，活着就是个谜'] },
+    { id:11, text:'我骨子里最固执的地方是？', max:2, options:['对某些事情的底线和原则','日常习惯和个人的节奏','自信，觉得自己肯定是对的','消费和理财的观念'] },
+    { id:12, text:'如果我有压力，通常我会？', max:2, options:['一个人默默消化','找最信任的朋友倾诉','出去玩、吃东西转移注意力','直接躺平，什么都不干'] },
+    { id:13, text:'我身上最让你觉得特别的地方是？', max:2, options:['偶尔看事很透彻','私底下挺有意思','有独特的小众爱好','对特定事物非常执着'] },
+    { id:14, text:'在社交圈里我通常扮演什么角色？', max:2, options:['活跃气氛的开心果','默默倾听的树洞','拿主意的定海神针','随波逐流的摸鱼选手'] },
+    { id:15, text:'我最大的反差点在哪里？', max:2, options:['表面社恐，熟了话痨','表面随和，内心有主见','口头摆烂，背后努力','对别人温柔，对自己很狠'] }
+];
+
+// 第二套：朋友眼中的自己（20题，含“喜欢的颜色”）
+const questionsYou = [
+    { id:1, text:'你觉得你自己是怎样的一个人？', max:2, options:['随遇而安，情绪平稳','感性敏锐，共情力强','目标明确，清醒务实','松弛随缘，主打真诚'] },
+    { id:2, text:'用哪种氛围形容你自己最贴切？', max:1, options:['静，如水般温和','冷，带着忧郁感','明，清醒且现实','暖，自带亲和力'] },
+    { id:3, text:'周末休息时你最喜欢怎么过？', max:2, options:['宅家休息，恢复元气','约朋友出门聚会','户外散步或运动','看书、打游戏等独处'] },
+    { id:4, text:'你最喜欢的颜色是什么？', max:2, options:['蓝/绿，清新自然','橙/红，温暖热烈','黑/白，纯粹极简','粉/紫，温柔梦幻'] },
+    { id:5, text:'你喜欢什么样的食物？', max:3, options:['麻辣鲜香的重口味','清淡鲜美的日料或海鲜','街头巷尾的烟火小吃','简单治愈的家常菜','各类甜品和奶茶'] },
+    { id:6, text:'遇到压力或者烦心事时，你通常怎么做？', max:3, options:['独自安静消化','找最信任的朋友倾诉','运动或外出发泄','睡觉或转移注意力'] },
+    { id:7, text:'你交朋友最看重对方的什么？', max:3, options:['真诚不虚伪','情绪稳定','有幽默感','上进有思想'] },
+    { id:8, text:'你在社交场合中通常是哪种状态？', max:1, options:['主动活跃气氛','安静倾听观察','随和但保持距离','偶尔会局促尴尬'] },
+    { id:9, text:'如果用一种动物形容自己，你选哪个？', max:1, options:['猫：独立又柔软','狗：热情且忠诚','鹿：温和且敏感','鹰：冷静且敏锐'] },
+    { id:10, text:'你对未来的生活最期待什么？', max:3, options:['财务自由，不再为钱愁','家庭圆满，平安顺遂','自我实现，追寻热爱','随遇而安，顺其自然'] },
+    { id:11, text:'你觉得自己的缺点是什么？', max:3, options:['容易拖延','容易多想，内耗','脾气有点急','不懂拒绝别人'] },
+    { id:12, text:'你更喜欢哪种沟通方式？', max:1, options:['当面直说','微信文字','电话语音','委婉暗示'] },
+    { id:13, text:'你最想尝试的新爱好是什么？', max:3, options:['摄影或拍视频','烹饪或烘焙','学习乐器或唱歌','健身或攀岩'] },
+    { id:14, text:'你对待感情的态度是怎样的？', max:1, options:['灵魂契合，偏爱共鸣','细水长流，踏实陪伴','顺其自然，缘分天定','共同进步，互相成就'] },
+    { id:15, text:'你更喜欢团队合作还是单打独斗？', max:1, options:['团队合作','独立完成','看情况而定'] },
+    { id:16, text:'你近期最大的烦恼来源于？', max:3, options:['工作或学业压力','经济状况','人际关系','身体健康'] },
+    { id:17, text:'你理想中的周末是什么样的？', max:3, options:['睡到自然醒','做手工或兴趣爱好','和好朋友一起','去户外或近郊'] },
+    { id:18, text:'用一句话形容你现在的状态？', max:1, options:['稳步向前，踏实充实','波澜不惊，平淡如水','充满迷茫，仍在探索','舒适自在，享受当下'] },
+    { id:19, text:'你最希望未来自己拥有哪种能力？', max:1, options:['抗压和情绪稳定','表达和社交能力','创造力和执行力','面对未知的勇气'] },
+    { id:20, text:'你最欣赏哪种人生哲学？', max:1, options:['活在当下，及时行乐','规划未来，稳步积累','顺其自然，不强求','尽力而为，不留遗憾'] }
+];
+
+// -------------------
+// 2. 核心引擎
+// -------------------
+let currentMode = 'me';
+let currentIndex = 0;
+let answers = [];
+let isViewMode = false; // 是不是只读模式
+
+function getQuestions() { return currentMode === 'me' ? questionsMe : questionsYou; }
+
+function resetAnswers() { answers = Array.from({length: getQuestions().length}, ()=>[]); }
+
+function switchMode(mode) {
+    if(mode === currentMode || isViewMode) return; // 只读模式下禁止切换
+    currentMode = mode;
+    document.getElementById('modeMe').classList.toggle('active', mode === 'me');
+    document.getElementById('modeYou').classList.toggle('active', mode === 'you');
+    
+    currentIndex = 0;
+    resetAnswers();
+    document.getElementById('resultPage').classList.remove('active');
+    document.getElementById('questionsWrapper').style.display = 'block';
+    
+    const submitBtn = document.querySelector('.btn-submit');
+    if(submitBtn) submitBtn.style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'inline-flex';
+    
+    renderQuestion(0);
+    updateButtons();
+    updateProgress();
+}
+
+const qc = document.getElementById('questionContainer'), pb = document.getElementById('progressBar');
+const prev = document.getElementById('prevBtn'), next = document.getElementById('nextBtn'), step = document.getElementById('stepIndicator');
+const resPage = document.getElementById('resultPage'), wrap = document.getElementById('questionsWrapper');
+const viewBanner = document.getElementById('viewBanner');
+
+function renderQuestion(idx){
+    const qs = getQuestions();
+    const q = qs[idx], sel = answers[idx];
+    let html = `<div class="question-card active"><div class="q-title">${idx+1}. ${q.text}</div><span class="q-hint ${isViewMode?'view-mode':''}">${isViewMode?'已选答案，仅可查看':'最多选 ' + q.max + ' 项'}</span><div class="options">`;
+    q.options.forEach((o, i) => {
+        const v = o, checked = sel.includes(v);
+        // 如果是只读模式，添加 view-mode 类
+        let cls = checked?'selected':'';
+        if(isViewMode) cls += ' view-mode';
+        html += `<div class="option-item ${cls}" data-idx="${idx}" data-val="${v}"><div class="checkbox"></div><span class="text">${v}</span></div>`;
+    });
+    html += `</div></div>`;
+    qc.innerHTML = html;
+    step.textContent = `${idx+1} / ${qs.length}`;
+    
+    if(!isViewMode) {
+        updateButtons();
+        // 绑定点击事件（普通模式）
+        document.querySelectorAll('.option-item').forEach(el => {
+            el.addEventListener('click', function() {
+                const qsI = getQuestions();
+                const idx = parseInt(this.dataset.idx), val = this.dataset.val, max = qsI[idx].max;
+                let arr = answers[idx];
+                if(arr.includes(val)){
+                    answers[idx] = arr.filter(v => v !== val);
+                } else {
+                    if(arr.length >= max) { alert(`此题最多只能选 ${max} 项哦`); return; }
+                    answers[idx] = [...arr, val];
+                }
+                renderQuestion(idx);
+            });
+        });
+    } else {
+        // 只读模式下的状态
+        document.getElementById('prevBtn').disabled = true;
+        document.getElementById('nextBtn').style.display = 'none';
+        document.querySelector('.btn-submit')?.remove(); // 移除提交按钮
+        document.getElementById('modeMe').disabled = true;
+        document.getElementById('modeYou').disabled = true;
+    }
+    updateProgress();
+}
+
+function updateButtons(){
+    const qs = getQuestions();
+    const has = answers[currentIndex].length > 0;
+    prev.disabled = currentIndex === 0;
+    if(currentIndex === qs.length - 1){
+        next.style.display = 'none';
+        let btn = document.querySelector('.btn-submit');
+        if(!btn){ 
+            btn = document.createElement('button'); 
+            btn.className = 'btn btn-submit'; 
+            btn.textContent = '提交并生成结果'; 
+            const nav = document.querySelector('.nav'); 
+            nav.insertBefore(btn, document.getElementById('stepIndicator')); 
+            btn.onclick = submit; 
+        }
+        btn.style.display = 'inline-flex'; 
+        btn.disabled = !has;
+    } else {
+        const btn = document.querySelector('.btn-submit');
+        if(btn) btn.style.display = 'none';
+        next.style.display = 'inline-flex'; 
+        next.disabled = !has;
+    }
+}
+
+function updateProgress(){
+    const qs = getQuestions();
+    const cnt = answers.filter(a => a.length > 0).length;
+    pb.style.width = Math.min((cnt/qs.length)*100, 100) + '%';
+}
+
+function submit(){
+    const qs = getQuestions();
+    if(answers.some(a => a.length === 0)){ alert('还有题目没选完，请检查'); return; }
+    wrap.style.display = 'none'; resPage.classList.add('active');
+    let html = '';
+    const modeName = currentMode === 'me' ? '第一套·朋友眼中的我' : '第二套·朋友眼中的自己';
+    html += `<div style="text-align:center;margin-bottom:16px;font-weight:600;color:#2b7aff;">✦ ${modeName} 结果 ✦</div>`;
+    qs.forEach((q, i) => {
+        const ans = answers[i].join('、') || '未作答';
+        html += `<div class="result-item"><div class="r-q">${i+1}. ${q.text}</div><div class="r-a">${ans}</div></div>`;
+    });
+    document.getElementById('resultContent').innerHTML = html;
+    
+    // 设置生成链接按钮
+    document.getElementById('shareBtn').onclick = function() {
+        // 把状态加密成Base64放入URL
+        const state = { type: currentMode, ans: answers };
+        const encoded = btoa(JSON.stringify(state));
+        // 当前网址 + ?view=
+        const shareUrl = window.location.origin + window.location.pathname + '?view=' + encodeURIComponent(encoded);
+        
+        // 复制到剪贴板
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert('✅ 只读结果链接已复制！\n发到微信/其他应用，朋友打开就能看到你的答案。');
+            }).catch(() => {
+                prompt('复制失败，请手动复制下面的链接：', shareUrl);
+            });
+        } else {
+            prompt('复制失败，请手动复制下面的链接：', shareUrl);
+        }
+    };
+}
+
+prev.onclick = ()=> { if(currentIndex>0 && !isViewMode){ currentIndex--; renderQuestion(currentIndex); } };
+next.onclick = ()=> { if(currentIndex<getQuestions().length-1 && answers[currentIndex].length>0 && !isViewMode){ currentIndex++; renderQuestion(currentIndex); } };
+document.getElementById('restartBtn').onclick = ()=> { if(!isViewMode){ resetAnswers(); currentIndex=0; resPage.classList.remove('active'); wrap.style.display='block'; renderQuestion(0); pb.style.width = '0%'; } };
+
+// -------------------
+// 3. 启动与读取URL参数
+// -------------------
+function init() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewData = urlParams.get('view');
+    
+    if (viewData) {
+        try {
+            const decoded = JSON.parse(atob(decodeURIComponent(viewData)));
+            if (decoded.type && decoded.ans) {
+                isViewMode = true;
+                viewBanner.style.display = 'block';
+                currentMode = decoded.type;
+                // 还原选择项
+                const qs = getQuestions();
+                answers = decoded.ans;
+                // 修正答案数组长度（防错）
+                if(answers.length !== qs.length) {
+                    // 如果解析出的答案长度不对，重新填充空
+                    const newAns = Array.from({length: qs.length}, ()=>[]);
+                    for(let i=0; i<Math.min(answers.length, qs.length); i++) {
+                        // 只保留有效选项
+                        newAns[i] = answers[i].filter(v => qs[i].options.includes(v));
+                    }
+                    answers = newAns;
+                }
+                // 渲染只读页
+                document.getElementById('modeMe').classList.toggle('active', currentMode === 'me');
+                document.getElementById('modeYou').classList.toggle('active', currentMode === 'you');
+                document.getElementById('modeMe').disabled = true;
+                document.getElementById('modeYou').disabled = true;
+                
+                // 隐藏导航，展示结果
+                document.getElementById('questionsWrapper').style.display = 'block';
+                document.querySelector('.nav').style.display = 'none'; // 隐藏上一题下一题
+                // 模拟提交效果，直接展示结果页
+                wrap.style.display = 'none'; resPage.classList.add('active');
+                let html = '';
+                const modeName = currentMode === 'me' ? '第一套·朋友眼中的我' : '第二套·朋友眼中的自己';
+                html += `<div style="text-align:center;margin-bottom:16px;font-weight:600;color:#2b7aff;">✦ ${modeName} 已答结果 ✦</div>`;
+                qs.forEach((q, i) => {
+                    const ans = answers[i].join('、') || '未作答';
+                    html += `<div class="result-item"><div class="r-q">${i+1}. ${q.text}</div><div class="r-a">${ans}</div></div>`;
+                });
+                document.getElementById('resultContent').innerHTML = html;
+                document.getElementById('shareBtn').style.display = 'none'; // 只读模式下隐藏生成按钮
+                return;
+            }
+        } catch (e) {
+            console.log('解析只读链接失败，进入普通模式');
+        }
+    }
+    
+    // 普通模式初始化
+    resetAnswers();
+    renderQuestion(0);
+}
+init();
 </script>
 </body>
 </html>
