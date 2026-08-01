@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>默契问卷</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 100%); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { max-width: 600px; width: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border-radius: 24px; padding: 24px 20px 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.5); }
+        .header { text-align: center; padding-bottom: 16px; border-bottom: 1px solid rgba(0,0,0,0.03); margin-bottom: 18px; }
+        .header h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; letter-spacing: 2px; }
+        .header p { font-size: 13px; color: #888; margin-top: 4px; }
+        .progress { height: 4px; background: #e8e8e8; border-radius: 4px; margin-bottom: 24px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; background: #2563eb; transition: width 0.3s; }
+        
+        .question-card { display: none; animation: fade 0.3s ease; }
+        .question-card.active { display: block; }
+        @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .q-title { font-size: 17px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
+        .q-hint { font-size: 13px; color: #2563eb; font-weight: 500; margin-bottom: 18px; display: block; }
+        
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        .option-item { display: flex; align-items: center; background: #f8fafc; border: 1.5px solid transparent; border-radius: 12px; padding: 12px 16px; cursor: pointer; transition: 0.2s; }
+        .option-item:hover { background: #f1f5f9; }
+        .option-item.selected { background: #eff6ff; border-color: #2563eb; }
+        .option-item.disabled { opacity: 0.4; pointer-events: none; }
+        .option-item .checkbox { width: 20px; height: 20px; border: 2px solid #cbd5e1; border-radius: 4px; margin-right: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; background: #fff; }
+        .option-item.selected .checkbox { background: #2563eb; border-color: #2563eb; }
+        .option-item.selected .checkbox::after { content: '✓'; color: #fff; font-size: 14px; font-weight: bold; }
+        .option-item .text { font-size: 15px; color: #1e293b; }
+
+        .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; gap: 12px; }
+        .btn { border: none; border-radius: 40px; padding: 12px 28px; font-size: 15px; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .btn-prev { background: #f1f5f9; color: #475569; }
+        .btn-prev:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-next { background: #2563eb; color: #fff; flex: 1; }
+        .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-submit { background: #f97316; color: #fff; flex: 1; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2); }
+        .step { font-size: 14px; color: #94a3b8; min-width: 60px; text-align: center; }
+
+        .result-page { display: none; animation: fade 0.4s; }
+        .result-page.active { display: block; }
+        .result-item { background: #f8fafc; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; border-left: 4px solid #2563eb; }
+        .result-item .r-q { font-weight: 600; font-size: 15px; color: #1a1a1a; margin-bottom: 6px; }
+        .result-item .r-a { color: #475569; font-size: 14px; line-height: 1.6; }
+        
+        .action-btns { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+        .btn-copy { background: #1e293b; color: #fff; flex: 1; justify-content: center; display: flex; align-items: center; }
+        .btn-copy:hover { background: #0f172a; }
+        .btn-restart { background: #e2e8f0; color: #1a1a1a; flex: 1; }
+
+        .footer { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.03); font-size: 13px; color: #94a3b8; }
+        .footer .highlight { color: #2563eb; font-weight: bold; font-size: 14px; }
+        @media (max-width: 480px) { .container { padding: 16px; } }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <div class="header">
+        <h1>✦ 默契测试</h1>
+        <p>选出最贴合的感受，不记名，纯走心</p>
+    </div>
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    <div id="questionsWrapper">
+        <div id="questionContainer"></div>
+        <div class="nav">
+            <button class="btn btn-prev" id="prevBtn" disabled>上一题</button>
+            <button class="btn btn-next" id="nextBtn">下一题</button>
+            <span class="step" id="stepIndicator">1 / 10</span>
+        </div>
+    </div>
+    
+    <div class="result-page" id="resultPage">
+        <div id="resultContent"></div>
+        <div class="action-btns">
+            <button class="btn btn-copy" id="copyBtn"><span>📋</span> 复制结果发给TA</button>
+            <button class="btn btn-restart" id="restartBtn">再测一次</button>
+        </div>
+    </div>
+
+    <div class="footer">问卷设计：<span class="highlight">Larry_awa</span></div>
+</div>
+<script>
+const questions = [
+    { id:1, text:'你对我第一印象是什么？', max:3, options:['清冷，不易接近','温和，感觉舒适','疏离，对外界淡漠','成熟，身上有故事','神秘，让人捉摸不透','幽默，自带亲和力'] },
+    { id:2, text:'你觉得我的性格底色偏向？', max:2, options:['理智，看问题通透','随性，向往自由','热烈，但内心敏感','平和，像温水一般','深邃，带着些许冷感'] },
+    { id:3, text:'熟了之后觉得我怎样？', max:2, options:['原来是话痨','相处更默契了','变得比较依赖人','反而更加客气了'] },
+    { id:4, text:'用哪种氛围形容你最贴切？', max:1, options:['静，如水般温和','冷，带着忧郁感','明，清醒且现实','暖，自带亲和力'] },
+    { id:5, text:'我身上最想吐槽的点？', max:5, options:['太会照顾人，忘了自己','对谁都彬彬有礼，分不清远近','消息常已读不回，行踪成谜','表面沉静，内心却十分跳脱','执念太深，容易钻牛角尖','情绪波动大，忽冷忽热','固执己见，听不进劝'] },
+    { id:6, text:'你觉得你自己是怎样的人？', max:3, options:['平稳，情绪不易起伏','敏锐，共情力很强','务实，目标感清晰','松弛，以真诚待人','矛盾，理性和感性交织','佛系，顺其自然'] },
+    { id:7, text:'周末约饭你选哪？', max:2, options:['安静角落，聊会儿天','市井街头，烟火气','咖啡馆或艺术展','随便，你来定就好'] },
+    { id:8, text:'我们俩性格相似吗？', max:2, options:['很像，像照镜子','互补，毫无违和','不同，但相处舒服','太像，总爱较劲'] },
+    { id:9, text:'初见哪个细节最深刻？', max:2, options:['当时的穿着打扮','说话时的语气','不经意的小动作','初次对话的氛围'] },
+    { id:10, text:'别人问起我，你怎么评价？', max:5, options:['人际广泛，却难深交','值得信赖和倾诉','温和善良，仅此而已','有一种无法定义的独特感','无可奉告，别问太多','是一面镜子，照见你自己','ta啊，活着就是个谜'] }
+];
+let current = 0, answers = Array.from({length:questions.length}, ()=>[]);
+const qc = document.getElementById('questionContainer'), pb = document.getElementById('progressBar'), prev = document.getElementById('prevBtn'), next = document.getElementById('nextBtn'), step = document.getElementById('stepIndicator'), resPage = document.getElementById('resultPage'), wrap = document.getElementById('questionsWrapper'), copyBtn = document.getElementById('copyBtn');
+
+function render(idx){
+    const q = questions[idx], sel = answers[idx];
+    let html = `<div class="question-card active"><div class="q-title">${idx+1}. ${q.text}</div><span class="q-hint">最多选 ${q.max} 项</span><div class="options">`;
+    q.options.forEach((o, i) => {
+        const v = o, checked = sel.includes(v);
+        html += `<div class="option-item ${checked?'selected':''}" data-idx="${idx}" data-val="${v}"><div class="checkbox"></div><span class="text">${v}</span></div>`;
+    });
+    html += `</div></div>`;
+    qc.innerHTML = html;
+    step.textContent = `${idx+1} / ${questions.length}`;
+    updateUI();
+    document.querySelectorAll('.option-item').forEach(el => {
+        el.addEventListener('click', function() {
+            const idx = parseInt(this.dataset.idx), val = this.dataset.val, max = questions[idx].max;
+            let arr = answers[idx];
+            if(arr.includes(val)){
+                answers[idx] = arr.filter(v => v !== val);
+            } else {
+                if(arr.length >= max) { alert(`此题最多只能选 ${max} 项哦`); return; }
+                answers[idx] = [...arr, val];
+            }
+            render(idx);
+        });
+    });
+    const cnt = answers.filter(a => a.length > 0).length;
+    pb.style.width = Math.min((cnt/questions.length)*100, 100) + '%';
+}
+
+function updateUI(){
+    const has = answers[current].length > 0;
+    prev.disabled = current === 0;
+    if(current === questions.length - 1){
+        next.style.display = 'none';
+        let btn = document.querySelector('.btn-submit');
+        if(!btn){ btn = document.createElement('button'); btn.className = 'btn btn-submit'; btn.textContent = '提交问卷'; const nav = document.querySelector('.nav'); nav.insertBefore(btn, document.getElementById('stepIndicator')); btn.onclick = submit; }
+        btn.style.display = 'inline-flex'; btn.disabled = !has;
+    } else {
+        const btn = document.querySelector('.btn-submit');
+        if(btn) btn.style.display = 'none';
+        next.style.display = 'inline-flex'; next.disabled = !has;
+    }
+}
+function submit(){
+    if(answers.some(a => a.length === 0)){ alert('还有题目没选完，请检查'); return; }
+    wrap.style.display = 'none'; resPage.classList.add('active');
+    let html = '';
+    questions.forEach((q, i) => {
+        const ans = answers[i].join('、') || '未作答';
+        html += `<div class="result-item"><div class="r-q">${i+1}. ${q.text}</div><div class="r-a">${ans}</div></div>`;
+    });
+    document.getElementById('resultContent').innerHTML = html;
+}
+prev.onclick = ()=> { if(current>0){ current--; render(current); } };
+next.onclick = ()=> { if(current<questions.length-1 && answers[current].length>0){ current++; render(current); } };
+document.getElementById('restartBtn').onclick = ()=> { answers = Array.from({length:questions.length}, ()=>[]); current=0; resPage.classList.remove('active'); wrap.style.display='block'; render(0); pb.style.width = '0%'; };
+
+// 【新增功能】一键复制结果发给作者
+copyBtn.onclick = async ()=>{
+    let text = `✦ 默契测试结果 ✦\n`;
+    questions.forEach((q, i) => {
+        const ans = answers[i].join('、') || '未选';
+        text += `\n${i+1}. ${q.text}\n  → ${ans}`;
+    });
+    text += `\n\n--- 复制这条消息直接发给TA！`;
+    try {
+        await navigator.clipboard.writeText(text);
+        alert('✅ 复制成功！请直接粘贴发给TA的微信吧！');
+    } catch {
+        alert('⚠️ 复制失败，请手动长按上面的文字复制。');
+    }
+};
+
+render(0);
+</script>
+</body>
+</html>
