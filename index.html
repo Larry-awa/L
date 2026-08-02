@@ -4,577 +4,439 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="author" content="Larry-awa">
-    <title>Larry 的灵感工坊</title>
+    <title>Larry 的工作台</title>
     <style>
-        /* 基础变量与黑金配色 */
         :root {
-            --bg-color: #080808;
-            --card-bg: rgba(20, 20, 20, 0.45);
-            --card-border: rgba(212, 175, 55, 0.3);
+            --bg-base: #0a0a0a;
+            --card-bg: rgba(20, 20, 20, 0.65);
+            --card-border: rgba(255, 215, 0, 0.25);
             --text-main: #f0f0f0;
-            --text-sub: #a0a0a0;
+            --text-sub: #888;
             --gold-accent: #d4af37;
-            --shadow-gold: 0 8px 32px rgba(212, 175, 55, 0.15);
-            --glass-blur: blur(16px);
-            --rain-filter: blur(1px);
-        }
-        /* 浅色白金模式 */
-        .light-mode {
-            --bg-color: #f0f2f5;
-            --card-bg: rgba(255, 255, 255, 0.5);
-            --card-border: rgba(180, 180, 180, 0.2);
-            --text-main: #1a1a1a;
-            --text-sub: #555;
-            --shadow-gold: 0 8px 32px rgba(0,0,0,0.06);
+            --shadow-gold: 0 8px 30px rgba(212, 175, 55, 0.10);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         
         body {
-            background: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            padding: 20px;
-            transition: background 0.5s ease, color 0.5s ease;
-            overflow-x: hidden;
-            position: relative;
+            background: var(--bg-base); color: var(--text-main);
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+            padding: 20px; position: relative; overflow-x: hidden;
         }
-        /* 黑金动态光影背景 */
-        .bg-glow {
-            position: fixed; top: -20%; left: -20%; width: 140%; height: 140%;
-            background: radial-gradient(circle at 30% 40%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 70%, rgba(212, 175, 55, 0.05) 0%, transparent 40%);
-            z-index: -2;
-            animation: goldFlow 15s infinite alternate ease-in-out;
-        }
-        @keyframes goldFlow {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            50% { transform: translate(-10%, -5%) scale(1.1) rotate(3deg); }
-            100% { transform: translate(10%, 5%) scale(1.2) rotate(-3deg); }
-        }
-        
-        .container { max-width: 600px; width: 100%; position: relative; z-index: 1; padding-bottom: 80px; }
 
-        /* 顶部标题与个人签名 */
-        .header { text-align: center; padding: 40px 0 30px; }
-        .header h1 { font-size: 28px; font-weight: 600; letter-spacing: 2px; background: linear-gradient(135deg, #d4af37, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .header .signature {
-            font-style: italic; font-family: 'Georgia', 'Times New Roman', serif;
-            font-size: 16px; color: var(--gold-accent);
-            margin-top: 6px; letter-spacing: 1px;
+        /* 1. 黑色幕布 + 侧边黑金光晕 */
+        .bg-black-mist {
+            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(135deg, transparent 40%, rgba(212,175,55,0.02) 50%, transparent 60%);
+            animation: mistSlide 30s linear infinite; z-index: -2;
         }
-        .header p { font-size: 14px; color: var(--text-sub); margin-top: 8px; letter-spacing: 1px; }
-
-        /* 深色模式竖条胶囊 */
-        .dark-toggle {
-            position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
-            width: 36px; padding: 12px 0; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--card-border); border-radius: 40px;
-            display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer;
-            backdrop-filter: blur(8px); z-index: 999; box-shadow: var(--shadow-gold);
-            transition: all 0.4s ease;
+        @keyframes mistSlide {
+            0% { transform: translate(-20%, -10%) rotate(0deg); }
+            100% { transform: translate(20%, 10%) rotate(5deg); }
         }
-        .dark-toggle span { font-size: 16px; color: var(--text-sub); transition: transform 0.4s ease; }
-        .dark-toggle:hover span { transform: scale(1.1); color: var(--gold-accent); }
+        .bg-side-glow {
+            position: fixed; top: 0; right: 0; width: 40%; height: 100%;
+            background: radial-gradient(circle at 80% 50%, rgba(212,175,55,0.08), transparent 70%);
+            z-index: -1; pointer-events: none;
+        }
 
-        /* 主页卡片区 */
-        #home-view { display: flex; flex-direction: column; gap: 16px; animation: fadeUp 0.6s ease; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .container { max-width: 800px; width: 100%; position: relative; z-index: 1; padding-bottom: 20px; }
 
-        .func-card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 20px; padding: 24px; cursor: pointer; backdrop-filter: var(--glass-blur);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* 2. 顶部标题与时间栏 */
+        .top-bar {
             display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 0 30px; flex-wrap: wrap; gap: 12px;
         }
-        .func-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: var(--shadow-gold); border-color: var(--gold-accent); }
-        .func-card .info h3 { font-size: 17px; font-weight: 600; color: var(--text-main); }
-        .func-card .info p { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
-        .func-card .icon { font-size: 28px; }
-        .func-card .arrow { color: var(--gold-accent); font-size: 18px; }
+        .top-bar .title-area h1 { font-size: 24px; font-weight: 500; letter-spacing: 1px; color: #fff; }
+        .top-bar .title-area .signature { font-family: 'Georgia', serif; font-style: italic; font-size: 14px; color: var(--gold-accent); margin-top: 2px; }
+        
+        /* 悬浮切换农历胶囊 */
+        .date-capsule {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            padding: 8px 18px; border-radius: 40px; font-size: 14px;
+            cursor: pointer; transition: 0.3s; color: var(--text-sub);
+            backdrop-filter: blur(4px);
+        }
+        .date-capsule:hover { color: #fff; border-color: var(--gold-accent); box-shadow: var(--shadow-gold); }
+        .date-capsule .lunar-date { display: none; }
+        .date-capsule.show-lunar .solar-date { display: none; }
+        .date-capsule.show-lunar .lunar-date { display: inline; }
 
-        /* 雨水背景特效（伦敦雨景） */
-        .rain-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; border-radius: 20px; z-index: 0; pointer-events: none; opacity: 0.4; }
-        .drop { position: absolute; bottom: 100%; width: 1px; height: 60px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.6)); animation: fall linear infinite; }
-        @keyframes fall { to { transform: translateY(100vh); } }
+        /* 3. MacOS 仪表盘网格排版 */
+        .grid-layout {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
 
-        /* 应用展开视图 */
-        .app-view { display: none; animation: fadeUp 0.5s ease; }
-        .app-view.active { display: block; }
-        .back-home { display: inline-flex; align-items: center; gap: 6px; color: var(--text-sub); cursor: pointer; margin-bottom: 16px; transition: 0.3s; padding: 8px 12px; border-radius: 30px; background: var(--card-bg); border: 1px solid var(--card-border); font-size: 14px; }
-        .back-home:hover { color: var(--gold-accent); border-color: var(--gold-accent); }
+        .widget-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 20px; padding: 20px; backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .widget-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-gold); border-color: var(--gold-accent); }
+        .widget-card .title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        
+        /* 卡片内容堆叠样式 */
+        .card-content { position: relative; z-index: 2; }
+        .card-bg-anim { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.15; }
 
-        /* 应用内部通用样式 */
-        .glass-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 24px; backdrop-filter: var(--glass-blur); margin-bottom: 20px; }
-        .glass-card .title { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--text-main); border-bottom: 1px solid var(--card-border); padding-bottom: 10px; }
-        .filter-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-        .filter-btn { border: 1px solid var(--card-border); background: transparent; color: var(--text-main); border-radius: 30px; padding: 6px 14px; cursor: pointer; transition: 0.3s; font-size: 13px; }
-        .filter-btn:hover, .filter-btn.active { background: var(--gold-accent); color: #000; border-color: var(--gold-accent); }
-        .slider-group { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
-        .slider-group label { font-size: 13px; color: var(--text-sub); display: flex; justify-content: space-between; }
-        .slider-group input { width: 100%; accent-color: var(--gold-accent); }
-        .tag-group { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
-        .mood-tag { background: var(--card-bg); border: 1px solid var(--card-border); padding: 6px 14px; border-radius: 30px; cursor: pointer; transition: 0.3s; font-size: 13px; color: var(--text-sub); }
-        .mood-tag.selected { background: var(--gold-accent); color: #000; border-color: var(--gold-accent); }
-        .quote-box { font-size: 18px; line-height: 1.8; min-height: 80px; color: var(--text-main); text-align: center; margin: 20px 0; font-style: italic; letter-spacing: 0.5px; }
+        /* 4. 各种卡片背景与动效 */
+        /* 密码卡片：黑客帝国背景 */
+        .matrix-bg { font-size: 10px; line-height: 12px; letter-spacing: 2px; color: #00ff41; opacity: 0.2; overflow: hidden; }
+        .matrix-col { position: absolute; top: -100%; animation: matrixFall 15s linear infinite; }
+        @keyframes matrixFall { 0% { top: -20%; } 100% { top: 100%; } }
 
-        /* 页脚 */
-        .footer-note { text-align: center; margin-top: 40px; font-size: 12px; color: var(--text-sub); border-top: 1px solid var(--card-border); padding-top: 20px; }
+        /* 骰子卡片：3D 掷骰子 */
+        .dice-box { width: 60px; height: 60px; margin: 0 auto; transform-style: preserve-3d; transition: transform 1s ease-out; }
+        .dice-box.rolling { animation: diceRoll3D 1.2s cubic-bezier(0.25, 1, 0.5, 1); }
+        @keyframes diceRoll3D {
+            0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+            100% { transform: rotateX(720deg) rotateY(720deg) rotateZ(360deg); }
+        }
+        .dice-face { position: absolute; width: 60px; height: 60px; background: #222; border: 1px solid #555; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #fff; backface-visibility: hidden; }
+        .dice-1 { transform: translateZ(30px); } .dice-6 { transform: rotateY(180deg) translateZ(30px); }
+        .dice-2 { transform: rotateX(90deg) translateZ(30px); } .dice-5 { transform: rotateX(-90deg) translateZ(30px); }
+        .dice-3 { transform: rotateY(90deg) translateZ(30px); } .dice-4 { transform: rotateY(-90deg) translateZ(30px); }
 
-        @media (max-width: 480px) { .func-card { padding: 18px; } .dark-toggle { right: 8px; width: 32px; padding: 10px 0; } .container { padding: 0 10px 80px; } }
-        .no-select { user-select: none; -webkit-user-select: none; }
+        /* 随机数卡片：老虎机滚动 */
+        .slot-machine-num { font-size: 48px; font-weight: bold; text-align: center; color: var(--gold-accent); transition: transform 0.1s; }
+        .slot-machine-num.rolling { animation: slotSpin 0.1s ease infinite; }
+        @keyframes slotSpin { 0% { transform: scale(1) translateY(0); } 100% { transform: scale(0.8) translateY(20px); } }
+
+        /* 5. 金句卡片（多语言，点击换句） */
+        .quote-text { font-size: 20px; font-style: italic; text-align: center; cursor: pointer; line-height: 1.6; margin: 12px 0; color: #fff; transition: 0.3s; }
+        .quote-text:hover { color: var(--gold-accent); }
+        .quote-trans { font-size: 12px; text-align: center; color: var(--text-sub); margin-top: 4px; letter-spacing: 1px; }
+        .quote-lang { font-size: 10px; text-align: center; color: #666; margin-top: 8px; }
+
+        /* 深色模式浅色替换 */
+        .light-mode { --bg-base: #f5f5f5; --card-bg: rgba(255,255,255,0.8); --card-border: rgba(0,0,0,0.1); --text-main: #222; --text-sub: #888; --shadow-gold: 0 8px 20px rgba(0,0,0,0.06); }
+        .light-mode .widget-card .title { color: #111; }
+        .light-mode .bg-black-mist { background: rgba(0,0,0,0.02); }
+        .light-mode .bg-side-glow { background: rgba(0,0,0,0.02); }
+
+        /* 右下角深色开关 */
+        .theme-toggle {
+            position: fixed; right: 20px; bottom: 40px;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 40px; padding: 10px 14px; cursor: pointer;
+            backdrop-filter: blur(8px); z-index: 99; transition: 0.3s;
+        }
+        .theme-toggle:hover { box-shadow: var(--shadow-gold); }
+
+        @media (max-width: 480px) {
+            .grid-layout { grid-template-columns: 1fr; }
+            .top-bar { flex-direction: column; align-items: flex-start; }
+        }
     </style>
 </head>
 <body>
-<div class="bg-glow"></div>
-<div class="container" id="app">
-    <!-- 顶部标题与意大利体签名 -->
-    <div class="header">
-        <h1>✦ Larry 的灵感工坊</h1>
-        <div class="signature">— Larry Orion Nereus</div>
-        <p>黑金极简 · 多功能百宝箱</p>
-    </div>
+<div class="bg-black-mist"></div>
+<div class="bg-side-glow"></div>
 
-    <!-- 右侧竖条深色模式 -->
-    <div class="dark-toggle" id="darkToggle" onclick="toggleTheme()">
-        <span id="themeIcon">🌙</span>
-    </div>
-
-    <!-- 主页卡片区 -->
-    <div id="home-view">
-        <div class="func-card" onclick="openApp('survey')">
-            <div class="info"><h3>📁 问卷与表单库</h3><p>双面默契问卷 · 截图分享</p></div>
-            <div class="arrow">›</div>
+<div class="container">
+    <!-- 顶部导航 -->
+    <div class="top-bar">
+        <div class="title-area">
+            <h1>Larry 的工作台</h1>
+            <div class="signature">— Larry Orion Nereus</div>
         </div>
-        <div class="func-card" onclick="openApp('photo')">
-            <div class="info"><h3>🎨 专业图片调色盘</h3><p>滤镜套用 · iPhone调色体验</p></div>
-            <div class="arrow">›</div>
-        </div>
-        <div class="func-card" onclick="openApp('memo')">
-            <div class="info"><h3>📝 私人灵感备忘录</h3><p>本地记录，关闭不掉</p></div>
-            <div class="arrow">›</div>
-        </div>
-        <div class="func-card" onclick="openApp('todo')">
-            <div class="info"><h3>✅ 极简待办清单</h3><p>规划日常，打勾划掉</p></div>
-            <div class="arrow">›</div>
-        </div>
-        <div class="func-card" onclick="openApp('password')">
-            <div class="info"><h3>🔐 神器密码生成器</h3><p>乱序高强度，一键复制</p></div>
-            <div class="arrow">›</div>
-        </div>
-        <div class="func-card" onclick="openApp('calc')">
-            <div class="info"><h3>🧮 多功能计算器</h3><p>基础四则运算</p></div>
-            <div class="arrow">›</div>
-        </div>
-        <div class="func-card" onclick="openApp('unit')">
-            <div class="info"><h3>📏 全能单位换算器</h3><p>长度、重量、温度等</p></div>
-            <div class="arrow">›</div>
-        </div>
-        <div class="func-card" onclick="openApp('quote')" style="position:relative;overflow:hidden;">
-            <div class="rain-container" id="rainBox"></div>
-            <div class="info" style="position:relative;z-index:1;"><h3>💡 灵魂文案生成器</h3><p>伦敦雨夜 · 忧郁高级风</p></div>
-            <div class="arrow" style="position:relative;z-index:1;">›</div>
-        </div>
-        <div class="func-card" onclick="openApp('toolbox')">
-            <div class="info"><h3>🎲 实用小工具盲盒</h3><p>随机数、掷骰子、拾色器</p></div>
-            <div class="arrow">›</div>
-        </div>
-        <!-- 新增第10个卡片：翻译 -->
-        <div class="func-card" onclick="openApp('translate')">
-            <div class="info"><h3>🌐 极简翻译工具</h3><p>免费 API 实时翻译</p></div>
-            <div class="arrow">›</div>
+        <!-- 悬浮切换农历的胶囊 -->
+        <div class="date-capsule" id="dateCapsule" onclick="toggleCalendar()">
+            <span class="solar-date" id="solarDate">加载中...</span>
+            <span class="lunar-date" id="lunarDate">加载中...</span>
         </div>
     </div>
 
-    <!-- 应用展开容器 -->
-    <div id="app-views">
-        <!-- ===== 应用 1：问卷 ===== -->
-        <div id="app-survey" class="app-view">
-            <div class="back-home" onclick="closeApp('survey')">‹ 返回主页</div>
-            <div class="glass-card">
-                <div class="title">📝 朋友双面问卷</div>
-                <div style="color:var(--text-sub);margin-bottom:16px;font-size:14px;">包含「你眼中的我」(15题) 与「你眼中的自己」(20题)，点击下方按钮进入完整版。</div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button onclick="window.location.href='https://larry-awa.github.io/L/survey.html'" style="flex:1;padding:10px;background:var(--gold-accent);color:#000;border:none;border-radius:40px;font-weight:bold;">启动完整问卷版</button>
-                </div>
-                <div style="margin-top:12px;font-size:12px;color:var(--text-sub);">* 由于功能众多，完整问卷独立于主页，继续使用分段截图保存。</div>
+    <!-- 主卡片网格 -->
+    <div class="grid-layout" id="appGrid">
+        
+        <!-- 1. 问卷与表单库 -->
+        <div class="widget-card" onclick="openSurvey()" style="cursor:pointer;">
+            <div class="card-content" style="display:flex; justify-content:space-between; align-items:center;">
+                <div><div class="title">📁 问卷与表单库</div><div style="font-size:12px;color:var(--text-sub);">双面默契问卷</div></div>
+                <span style="color:var(--gold-accent);font-size:18px;">›</span>
             </div>
         </div>
-        <!-- ===== 应用 2：图片调色 ===== -->
-        <div id="app-photo" class="app-view">
-            <div class="back-home" onclick="closeApp('photo')">‹ 返回主页</div>
-            <div class="glass-card">
-                <div class="title">🎨 图片滤镜与调色</div>
-                <input type="file" id="imgInput" accept="image/*" style="width:100%;padding:8px;border:1px dashed var(--card-border);border-radius:12px;margin-bottom:12px;color:var(--text-sub);">
-                <div style="text-align:center;min-height:150px;display:flex;align-items:center;justify-content:center;background:var(--card-bg);border-radius:12px;" id="imgPreview">请上传一张图片</div>
-                <div class="filter-grid"><button class="filter-btn" onclick="applyFilter('none')">原图</button><button class="filter-btn" onclick="applyFilter('grayscale')">黑白</button><button class="filter-btn" onclick="applyFilter('sepia')">复古</button><button class="filter-btn" onclick="applyFilter('vintage')">胶片</button><button class="filter-btn" onclick="applyFilter('cold')">冷色</button><button class="filter-btn" onclick="applyFilter('warm')">暖色</button></div>
-                <div class="slider-group"><label>亮度 <span id="brightVal">100</span></label><input type="range" id="brightness" min="0" max="200" value="100" oninput="updateSliders()"></div>
-                <div class="slider-group"><label>对比度 <span id="contVal">100</span></label><input type="range" id="contrast" min="0" max="200" value="100" oninput="updateSliders()"></div>
-                <div class="slider-group"><label>饱和度 <span id="satVal">100</span></label><input type="range" id="saturate" min="0" max="200" value="100" oninput="updateSliders()"></div>
-                <button class="filter-btn active" style="width:100%;margin-top:12px;background:var(--gold-accent);color:#000;" onclick="downloadImage()">⬇ 保存调色后图片</button>
+
+        <!-- 2. 图片调色盘 -->
+        <div class="widget-card">
+            <div class="card-content">
+                <div class="title">🎨 图片调色</div>
+                <input type="file" id="imgInput" style="width:100%;margin-bottom:8px;font-size:12px;color:var(--text-sub);background:transparent;border:none;">
+                <div id="imgPreview" style="width:100%;height:100px;background:#111;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-sub);">上传图片</div>
             </div>
         </div>
-        <!-- ===== 应用 3：备忘录 ===== -->
-        <div id="app-memo" class="app-view">
-            <div class="back-home" onclick="closeApp('memo')">‹ 返回主页</div>
-            <div class="glass-card">
-                <div class="title">📝 备忘录（自动保存）</div>
-                <textarea id="memoText" style="width:100%;height:200px;background:transparent;border:none;color:var(--text-main);font-size:15px;line-height:1.8;resize:none;outline:none;" placeholder="写点什么吧..."></textarea>
+
+        <!-- 3. 备忘录 -->
+        <div class="widget-card">
+            <div class="card-content">
+                <div class="title">📝 备忘录</div>
+                <textarea id="memoText" style="width:100%;height:80px;background:transparent;border:none;color:var(--text-main);font-size:13px;resize:none;outline:none;" placeholder="记录灵感..."></textarea>
             </div>
         </div>
-        <!-- ===== 应用 4：待办 ===== -->
-        <div id="app-todo" class="app-view">
-            <div class="back-home" onclick="closeApp('todo')">‹ 返回主页</div>
-            <div class="glass-card">
+
+        <!-- 4. 待办清单 -->
+        <div class="widget-card">
+            <div class="card-content">
                 <div class="title">✅ 待办清单</div>
-                <div style="display:flex;gap:8px;margin-bottom:16px;"><input id="todoInput" placeholder="输入新任务..." style="flex:1;padding:10px;border:1px solid var(--card-border);border-radius:40px;background:var(--card-bg);color:var(--text-main);outline:none;"><button onclick="addTodo()" style="padding:10px 20px;background:var(--gold-accent);color:#000;border:none;border-radius:40px;font-weight:bold;">添加</button></div>
-                <div id="todoList"></div>
+                <div style="display:flex;gap:4px;margin-bottom:8px;"><input id="todoInput" placeholder="待办..." style="flex:1;padding:6px;background:transparent;border:1px solid var(--card-border);border-radius:12px;color:var(--text-main);font-size:12px;outline:none;"><button onclick="addTodo()" style="background:var(--gold-accent);color:#000;border:none;border-radius:12px;padding:6px 12px;font-size:12px;">+</button></div>
+                <div id="todoList" style="font-size:13px;color:var(--text-sub);"></div>
             </div>
         </div>
-        <!-- ===== 应用 5：密码 ===== -->
-        <div id="app-password" class="app-view">
-            <div class="back-home" onclick="closeApp('password')">‹ 返回主页</div>
-            <div class="glass-card">
-                <div class="title">🔐 高强度密码生成器</div>
-                <div style="font-size:24px;text-align:center;padding:16px;background:var(--card-bg);border-radius:12px;letter-spacing:4px;margin-bottom:12px;word-break:break-all;" id="pwdDisplay">P@ssw0rd</div>
-                <button onclick="copyPwd()" style="width:100%;padding:8px;background:var(--gold-accent);color:#000;border:none;border-radius:30px;font-weight:bold;margin-bottom:12px;">📋 复制密码</button>
-                <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-sub);"><span>密码长度：<span id="lenDisplay">12</span></span><span>强度：<span id="strengthDisplay">强</span></span></div>
-                <input type="range" id="pwdLen" min="6" max="30" value="12" style="width:100%;accent-color:var(--gold-accent);" oninput="genPwd()">
-                <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;">
-                    <label><input type="checkbox" id="upper" checked onchange="genPwd()"> 大写</label>
-                    <label><input type="checkbox" id="lower" checked onchange="genPwd()"> 小写</label>
-                    <label><input type="checkbox" id="number" checked onchange="genPwd()"> 数字</label>
-                    <label><input type="checkbox" id="symbol" checked onchange="genPwd()"> 符号</label>
-                </div>
-            </div>
-        </div>
-        <!-- ===== 应用 6：计算器 ===== -->
-        <div id="app-calc" class="app-view">
-            <div class="back-home" onclick="closeApp('calc')">‹ 返回主页</div>
-            <div class="glass-card">
-                <div class="title">🧮 计算器</div>
-                <div id="calcScreen" style="font-size:32px;padding:16px 0;text-align:right;border-bottom:1px solid var(--card-border);margin-bottom:12px;min-height:60px;">0</div>
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-                    <button class="filter-btn" onclick="calcInput('C')">C</button><button class="filter-btn" onclick="calcInput('±')">±</button><button class="filter-btn" onclick="calcInput('%')">%</button><button class="filter-btn" onclick="calcInput('/')">÷</button>
-                    <button class="filter-btn" onclick="calcInput('7')">7</button><button class="filter-btn" onclick="calcInput('8')">8</button><button class="filter-btn" onclick="calcInput('9')">9</button><button class="filter-btn" onclick="calcInput('*')">×</button>
-                    <button class="filter-btn" onclick="calcInput('4')">4</button><button class="filter-btn" onclick="calcInput('5')">5</button><button class="filter-btn" onclick="calcInput('6')">6</button><button class="filter-btn" onclick="calcInput('-')">-</button>
-                    <button class="filter-btn" onclick="calcInput('1')">1</button><button class="filter-btn" onclick="calcInput('2')">2</button><button class="filter-btn" onclick="calcInput('3')">3</button><button class="filter-btn" onclick="calcInput('+')">+</button>
-                    <button class="filter-btn" style="grid-column:span 2;" onclick="calcInput('0')">0</button><button class="filter-btn" onclick="calcInput('.')">.</button><button class="filter-btn" style="background:var(--gold-accent);color:#000;" onclick="calcInput('=')">=</button>
-                </div>
-            </div>
-        </div>
-        <!-- ===== 应用 7：单位换算 ===== -->
-        <div id="app-unit" class="app-view">
-            <div class="back-home" onclick="closeApp('unit')">‹ 返回主页</div>
-            <div class="glass-card">
-                <div class="title">📏 单位换算</div>
-                <select id="unitType" style="width:100%;padding:8px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;color:var(--text-main);margin-bottom:12px;" onchange="updateUnitOptions()">
-                    <option value="length">长度</option><option value="weight">重量</option><option value="temp">温度</option><option value="volume">体积</option>
-                </select>
-                <div style="display:flex;gap:12px;">
-                    <input type="number" id="unitVal" placeholder="数值" style="flex:1;padding:8px;border:1px solid var(--card-border);border-radius:12px;background:var(--card-bg);color:var(--text-main);">
-                    <select id="unitFrom" style="flex:1;padding:8px;border:1px solid var(--card-border);border-radius:12px;background:var(--card-bg);color:var(--text-main);"></select>
-                    <span style="color:var(--text-sub);display:flex;align-items:center;">→</span>
-                    <select id="unitTo" style="flex:1;padding:8px;border:1px solid var(--card-border);border-radius:12px;background:var(--card-bg);color:var(--text-main);"></select>
-                </div>
-                <button onclick="convertUnit()" style="width:100%;padding:8px;margin-top:12px;background:var(--gold-accent);color:#000;border:none;border-radius:30px;font-weight:bold;">换算</button>
-                <div id="unitResult" style="margin-top:16px;font-size:18px;text-align:center;color:var(--text-main);"></div>
-            </div>
-        </div>
-        <!-- ===== 应用 8：金句生成器 ===== -->
-        <div id="app-quote" class="app-view">
-            <div class="back-home" onclick="closeApp('quote')">‹ 返回主页</div>
-            <div class="glass-card" style="position:relative;overflow:hidden;">
-                <div class="rain-container" id="rainBoxFull" style="opacity:0.6;z-index:0;"></div>
-                <div style="position:relative;z-index:1;">
-                    <div class="title" style="border-bottom-color:transparent;">💡 灵魂文案生成器</div>
-                    <div style="text-align:center;margin-bottom:12px;font-size:24px;font-weight:300;color:var(--text-sub);">🌧️ 伦敦忧郁雨夜</div>
-                    <div class="tag-group" style="justify-content:center;">
-                        <span class="mood-tag" onclick="toggleTag(this)">🌧️ 忧郁</span>
-                        <span class="mood-tag" onclick="toggleTag(this)">🎭 高级</span>
-                        <span class="mood-tag" onclick="toggleTag(this)">📖 文艺</span>
-                        <span class="mood-tag" onclick="toggleTag(this)">🌿 治愈</span>
-                        <span class="mood-tag" onclick="toggleTag(this)">🔥 微丧</span>
-                    </div>
-                    <button onclick="generateQuote()" style="width:100%;padding:10px;background:var(--gold-accent);color:#000;border:none;border-radius:30px;font-weight:bold;font-size:16px;">🔮 触碰到蓝光</button>
-                    <div id="quoteResult" class="quote-box">选择一个风格，触碰蓝光...</div>
-                </div>
-            </div>
-        </div>
-        <!-- ===== 应用 9：盲盒 ===== -->
-        <div id="app-toolbox" class="app-view">
-            <div class="back-home" onclick="closeApp('toolbox')">‹ 返回主页</div>
-            <div class="glass-card">
-                <div class="title">🎲 实用小工具</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                    <div style="text-align:center;border:1px solid var(--card-border);border-radius:16px;padding:20px;">
-                        <div style="font-size:28px;font-weight:bold;color:var(--text-main);" id="randNum">0</div>
-                        <button onclick="document.getElementById('randNum').innerText=Math.floor(Math.random()*100)+1" style="margin-top:8px;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-main);padding:6px 16px;border-radius:30px;">随机数</button>
-                    </div>
-                    <div style="text-align:center;border:1px solid var(--card-border);border-radius:16px;padding:20px;">
-                        <div style="font-size:28px;font-weight:bold;color:var(--text-main);" id="diceDisplay">⚀</div>
-                        <button onclick="rollDice()" style="margin-top:8px;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-main);padding:6px 16px;border-radius:30px;">掷骰子</button>
-                    </div>
-                    <div style="text-align:center;border:1px solid var(--card-border);border-radius:16px;padding:20px;grid-column:span 2;">
-                        <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
-                            <span style="color:var(--text-main);">颜色拾取</span>
-                            <input type="color" id="colorPicker" value="#d4af37" oninput="document.getElementById('colorHex').innerText=this.value" style="width:40px;height:40px;border:none;background:transparent;">
-                            <span id="colorHex" style="font-size:14px;color:var(--text-main);">#d4af37</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- ===== 应用 10：翻译工具 ===== -->
-        <div id="app-translate" class="app-view">
-            <div class="back-home" onclick="closeApp('translate')">‹ 返回主页</div>
-            <div class="glass-card">
-                <div class="title">🌐 极简翻译工具</div>
-                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-                    <select id="langFrom" style="flex:1;padding:8px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;color:var(--text-main);">
-                        <option value="en">英语 (EN)</option>
-                        <option value="zh-CN" selected>中文 (CN)</option>
-                        <option value="ja">日语 (JA)</option>
-                        <option value="fr">法语 (FR)</option>
-                        <option value="ko">韩语 (KO)</option>
-                    </select>
-                    <span style="color:var(--text-sub);display:flex;align-items:center;">→</span>
-                    <select id="langTo" style="flex:1;padding:8px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;color:var(--text-main);">
-                        <option value="en">英语 (EN)</option>
-                        <option value="zh-CN" selected>中文 (CN)</option>
-                        <option value="ja">日语 (JA)</option>
-                        <option value="fr">法语 (FR)</option>
-                        <option value="ko">韩语 (KO)</option>
-                    </select>
-                </div>
-                <textarea id="transInput" placeholder="输入要翻译的文字..." style="width:100%;height:100px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;color:var(--text-main);padding:12px;resize:none;outline:none;"></textarea>
-                <button onclick="translateText()" style="width:100%;padding:10px;margin:12px 0;background:var(--gold-accent);color:#000;border:none;border-radius:30px;font-weight:bold;">🔄 点击翻译</button>
-                <div id="transResult" style="padding:12px;background:var(--card-bg);border-radius:12px;min-height:60px;color:var(--text-main);">翻译结果将显示在这里</div>
-                <div style="margin-top:8px;font-size:10px;color:var(--text-sub);">* 调用免费公共 API，每日有字符数限制，仅供个人使用</div>
-            </div>
-        </div>
-    </div>
 
-    <div class="footer-note">⚙️ 更多有趣功能开发中... © 2026 Larry</div>
+        <!-- 5. 密码生成器（黑客帝国背景） -->
+        <div class="widget-card" id="matrixCard">
+            <div class="card-bg-anim matrix-bg" id="matrixBg"></div>
+            <div class="card-content">
+                <div class="title">🔐 密码生成</div>
+                <div id="pwdDisplay" style="font-size:18px;letter-spacing:2px;text-align:center;padding:8px 0;background:rgba(0,0,0,0.3);border-radius:8px;">P@ssw0rd</div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <button onclick="genPwd()" style="flex:1;background:var(--gold-accent);color:#000;border:none;border-radius:12px;padding:4px 0;font-size:12px;">刷新</button>
+                    <button onclick="copyPwd()" style="flex:1;background:transparent;border:1px solid var(--card-border);color:var(--text-main);border-radius:12px;padding:4px 0;font-size:12px;">复制</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. 计算器 -->
+        <div class="widget-card">
+            <div class="card-content">
+                <div class="title">🧮 计算器</div>
+                <div id="calcScreen" style="text-align:right;font-size:24px;padding:4px 0;border-bottom:1px solid var(--card-border);margin-bottom:8px;min-height:32px;">0</div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;">
+                    <button class="calc-btn" onclick="calcInput('C')">C</button><button class="calc-btn" onclick="calcInput('±')">±</button><button class="calc-btn" onclick="calcInput('%')">%</button><button class="calc-btn" onclick="calcInput('/')">÷</button>
+                    <button class="calc-btn" onclick="calcInput('7')">7</button><button class="calc-btn" onclick="calcInput('8')">8</button><button class="calc-btn" onclick="calcInput('9')">9</button><button class="calc-btn" onclick="calcInput('*')">×</button>
+                    <button class="calc-btn" onclick="calcInput('4')">4</button><button class="calc-btn" onclick="calcInput('5')">5</button><button class="calc-btn" onclick="calcInput('6')">6</button><button class="calc-btn" onclick="calcInput('-')">-</button>
+                    <button class="calc-btn" onclick="calcInput('1')">1</button><button class="calc-btn" onclick="calcInput('2')">2</button><button class="calc-btn" onclick="calcInput('3')">3</button><button class="calc-btn" onclick="calcInput('+')">+</button>
+                    <button style="grid-column:span 2;" class="calc-btn" onclick="calcInput('0')">0</button><button class="calc-btn" onclick="calcInput('.')">.</button><button class="calc-btn" style="background:var(--gold-accent);color:#000;" onclick="calcInput('=')">=</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. 单位换算 -->
+        <div class="widget-card">
+            <div class="card-content">
+                <div class="title">📏 单位换算</div>
+                <div style="display:flex;gap:4px;font-size:12px;flex-wrap:wrap;">
+                    <select id="unitType" style="flex:1;background:transparent;border:1px solid var(--card-border);border-radius:8px;color:var(--text-main);padding:4px;" onchange="updateUnitOptions()"><option value="length">长度</option><option value="weight">重量</option><option value="temp">温度</option><option value="volume">体积</option></select>
+                    <input type="number" id="unitVal" placeholder="数值" style="flex:1;background:transparent;border:1px solid var(--card-border);border-radius:8px;color:var(--text-main);padding:4px;width:40px;">
+                </div>
+                <div style="display:flex;gap:4px;margin-top:4px;font-size:12px;">
+                    <select id="unitFrom" style="flex:1;background:transparent;border:1px solid var(--card-border);border-radius:8px;color:var(--text-main);"></select>
+                    <span style="color:var(--text-sub);">→</span>
+                    <select id="unitTo" style="flex:1;background:transparent;border:1px solid var(--card-border);border-radius:8px;color:var(--text-main);"></select>
+                    <button onclick="convertUnit()" style="background:var(--gold-accent);color:#000;border:none;border-radius:8px;padding:0 12px;">=</button>
+                </div>
+                <div id="unitResult" style="margin-top:6px;font-size:12px;text-align:center;color:var(--text-sub);"></div>
+            </div>
+        </div>
+
+        <!-- 8. 灵魂文案生成器（中英俄） -->
+        <div class="widget-card">
+            <div class="card-content" style="text-align:center;">
+                <div class="title" style="justify-content:center;">💡 灵魂文案</div>
+                <div id="quoteBox" onclick="nextQuote()" style="cursor:pointer;">
+                    <div id="quoteText" class="quote-text">触碰以获取灵感</div>
+                    <div id="quoteTrans" class="quote-trans">---</div>
+                    <div id="quoteLang" class="quote-lang">🌐</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. 实用小工具 -->
+        <div class="widget-card">
+            <div class="card-content" style="display:flex;flex-direction:column;">
+                <div class="title">🎲 小工具</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;height:100%;">
+                    <!-- 3D 骰子 -->
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--card-border);border-radius:12px;padding:8px;">
+                        <div class="dice-box" id="diceBox" onclick="rollDice(this)">
+                            <div class="dice-face dice-1">⚀</div><div class="dice-face dice-6">⚅</div>
+                            <div class="dice-face dice-2">⚁</div><div class="dice-face dice-5">⚄</div>
+                            <div class="dice-face dice-3">⚂</div><div class="dice-face dice-4">⚃</div>
+                        </div>
+                        <div style="font-size:10px;color:var(--text-sub);margin-top:4px;">点击掷骰</div>
+                    </div>
+                    <!-- 滚动随机数 -->
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--card-border);border-radius:12px;padding:8px;cursor:pointer;" onclick="rollRandom()">
+                        <div class="slot-machine-num" id="randomNumDisplay">0</div>
+                        <div style="font-size:10px;color:var(--text-sub);margin-top:4px;">点击随机</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()">☀️</div>
 </div>
 
 <script>
-    // ---------------- 全局功能与主题 ----------------
+    // 全局变量初始化
     function toggleTheme() {
         document.body.classList.toggle('light-mode');
-        document.getElementById('themeIcon').innerText = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+        document.getElementById('themeToggle').innerText = document.body.classList.contains('light-mode') ? '🌙' : '☀️';
     }
-    
-    // 页面防盗
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.onkeydown = function(e) {
-        if(e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J'))) {
-            alert('⚠️ 此作品由 Larry 倾心设计，仅供娱乐交流，请勿盗用。');
-            return false;
+
+    // 1. 阴历/阳历切换（悬浮模拟）
+    const lunarMap = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
+    function getLunarDate() {
+        const d = new Date(); const year = d.getFullYear(); const month = d.getMonth(); const day = d.getDate();
+        // 简化农历算法（真实年份需查表，此处用模拟感的高级占位）
+        // 真实情况需要引入庞大的农历库，为了单页代码纯净，这里用近似模拟让UI运转
+        const lunYear = '丙午'; // 简化的固定占位，用于视觉展示
+        const lunMonth = lunarMap[month % 12] + '月';
+        const lunDay = (day % 30 === 0 ? '三十' : ['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'][day % 30]);
+        return `${lunYear}年 ${lunMonth} ${lunDay}`;
+    }
+    function updateDate() {
+        const d = new Date();
+        document.getElementById('solarDate').innerText = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;
+        document.getElementById('lunarDate').innerText = getLunarDate();
+    }
+    let isLunar = false;
+    function toggleCalendar() {
+        isLunar = !isLunar;
+        document.getElementById('dateCapsule').classList.toggle('show-lunar', isLunar);
+    }
+    updateDate(); setInterval(updateDate, 60000);
+
+    // 2. 黑客帝国背景（密码卡）
+    function initMatrix() {
+        const bg = document.getElementById('matrixBg');
+        for(let i=0; i<8; i++) {
+            const col = document.createElement('div'); col.className = 'matrix-col';
+            col.style.left = Math.random() * 90 + '%';
+            col.style.animationDelay = (Math.random()*5)+'s';
+            col.style.animationDuration = (5+Math.random()*5)+'s';
+            let txt=''; for(let j=0; j<20; j++) txt += Math.random()>0.5?'0':'1' + '<br>';
+            col.innerHTML = txt;
+            bg.appendChild(col);
         }
-    };
-    console.log('%c ⚠️ 此作品由 Larry 倾心设计，仅供娱乐交流，请勿盗用提取源码。', 'font-size: 20px; color: #d4af37; font-weight: bold;');
-
-    function openApp(id) { document.getElementById('home-view').style.display = 'none'; document.getElementById('app-' + id).classList.add('active'); }
-    function closeApp(id) { document.getElementById('app-' + id).classList.remove('active'); document.getElementById('home-view').style.display = 'flex'; }
-
-    // ---------------- 1. 问卷逻辑 ----------------
-    (function() {
-        const surveyContainer = document.getElementById('app-survey');
-        surveyContainer.innerHTML = `
-            <div class="back-home" onclick="closeApp('survey')">‹ 返回主页</div>
-            <div class="glass-card">
-                <div class="title">📝 朋友双面问卷</div>
-                <div style="color:var(--text-sub);margin-bottom:16px;font-size:14px;">包含「你眼中的我」(15题) 与「你眼中的自己」(20题)，点击下方按钮进入完整版。</div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button onclick="window.location.href='https://larry-awa.github.io/L/survey.html'" style="flex:1;padding:10px;background:var(--gold-accent);color:#000;border:none;border-radius:40px;font-weight:bold;">启动完整问卷版</button>
-                </div>
-                <div style="margin-top:12px;font-size:12px;color:var(--text-sub);">* 由于功能众多，完整问卷独立于主页，继续使用分段截图保存。</div>
-            </div>
-        `;
-    })();
-
-    // ---------------- 2. 图片调色盘 ----------------
-    let imgCanvas = document.createElement('canvas');
-    let imgCtx = imgCanvas.getContext('2d');
-    let currentImage = null;
-    document.getElementById('imgInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-            const img = new Image();
-            img.onload = function() {
-                imgCanvas.width = img.width; imgCanvas.height = img.height;
-                imgCtx.drawImage(img, 0, 0);
-                currentImage = img;
-                document.getElementById('imgPreview').innerHTML = '';
-                document.getElementById('imgPreview').appendChild(imgCanvas);
-                applyFilter('none');
-            };
-            img.src = ev.target.result;
-        };
-        reader.readAsDataURL(file);
-    });
-    function applyFilter(type) {
-        if(!currentImage) return;
-        imgCtx.filter = 'none';
-        imgCtx.drawImage(currentImage, 0, 0);
-        const filters = {
-            'none': 'none',
-            'grayscale': 'grayscale(100%)',
-            'sepia': 'sepia(80%)',
-            'vintage': 'sepia(60%) contrast(110%) brightness(90%)',
-            'cold': 'hue-rotate(180deg) saturate(80%)',
-            'warm': 'hue-rotate(-30deg) saturate(120%)'
-        };
-        if(type !== 'none' && filters[type]) {
-            imgCtx.filter = filters[type];
-            imgCtx.drawImage(currentImage, 0, 0);
-        }
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
     }
-    function updateSliders() {
-        if(!currentImage) return;
-        const b = document.getElementById('brightness').value;
-        const c = document.getElementById('contrast').value;
-        const s = document.getElementById('saturate').value;
-        document.getElementById('brightVal').innerText = b; document.getElementById('contVal').innerText = c; document.getElementById('satVal').innerText = s;
-        imgCtx.filter = `brightness(${b}%) contrast(${c}%) saturate(${s}%)`;
-        imgCtx.drawImage(currentImage, 0, 0);
-    }
-    function downloadImage() {
-        const link = document.createElement('a');
-        link.download = '调色图片.png';
-        link.href = imgCanvas.toDataURL('image/png');
-        link.click();
-    }
+    initMatrix();
 
-    // ---------------- 3. 备忘录 ----------------
-    document.getElementById('memoText').value = localStorage.getItem('larryMemo') || '';
-    document.getElementById('memoText').addEventListener('input', function() {
-        localStorage.setItem('larryMemo', this.value);
-    });
-
-    // ---------------- 4. 待办清单 ----------------
-    function loadTodos() { const data = JSON.parse(localStorage.getItem('larryTodos') || '[]');
-        document.getElementById('todoList').innerHTML = data.map((t, i) => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--card-border);"><span style="flex:1;text-decoration:${t.done?'line-through':'none'};color:${t.done?'var(--text-sub)':'var(--text-main)'};" onclick="toggleTodo(${i})">${t.text}</span><span style="color:var(--text-sub);font-size:12px;cursor:pointer;" onclick="deleteTodo(${i})">✕</span></div>`).join(''); }
-    function saveTodos(data) { localStorage.setItem('larryTodos', JSON.stringify(data)); loadTodos(); }
-    function addTodo() { const input = document.getElementById('todoInput'); if(!input.value) return; const data = JSON.parse(localStorage.getItem('larryTodos') || '[]'); data.push({text: input.value, done: false}); saveTodos(data); input.value = ''; }
-    function toggleTodo(i) { const data = JSON.parse(localStorage.getItem('larryTodos') || '[]'); data[i].done = !data[i].done; saveTodos(data); }
-    function deleteTodo(i) { const data = JSON.parse(localStorage.getItem('larryTodos') || '[]'); data.splice(i, 1); saveTodos(data); }
-    loadTodos();
-
-    // ---------------- 5. 密码生成器 ----------------
+    // 3. 密码生成器
     function genPwd() {
-        const len = document.getElementById('pwdLen').value; document.getElementById('lenDisplay').innerText = len;
-        const chars = { upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', lower: 'abcdefghijklmnopqrstuvwxyz', number: '0123456789', symbol: '!@#$%^&*()_+-=' };
-        let pool = ''; if(document.getElementById('upper').checked) pool += chars.upper; if(document.getElementById('lower').checked) pool += chars.lower; if(document.getElementById('number').checked) pool += chars.number; if(document.getElementById('symbol').checked) pool += chars.symbol;
-        if(!pool) pool = chars.lower;
-        let pwd = ''; for(let i=0; i<len; i++) pwd += pool[Math.floor(Math.random() * pool.length)];
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        let pwd = ''; for(let i=0; i<14; i++) pwd += chars[Math.floor(Math.random()*chars.length)];
         document.getElementById('pwdDisplay').innerText = pwd;
-        const strength = len < 10 ? '中' : len < 16 ? '强' : '极强'; document.getElementById('strengthDisplay').innerText = strength;
     }
-    function copyPwd() { navigator.clipboard.writeText(document.getElementById('pwdDisplay').innerText).then(() => alert('✅ 密码已复制')); }
-    genPwd();
+    function copyPwd() { const t = document.getElementById('pwdDisplay').innerText; navigator.clipboard?.writeText(t).then(()=>alert('已复制')); }
 
-    // ---------------- 6. 计算器 ----------------
+    // 4. 计算器
     let calcStr = '0';
-    function calcInput(val) {
-        const screen = document.getElementById('calcScreen');
-        if(val === 'C') { calcStr = '0'; } else if(val === '±') { if(calcStr.startsWith('-')) calcStr = calcStr.slice(1); else calcStr = '-' + calcStr; } else if(val === '%') { calcStr = (parseFloat(eval(calcStr)) / 100).toString(); } else if(val === '=') { try { calcStr = eval(calcStr.replace('×','*').replace('÷','/')).toString(); } catch(e){calcStr='Error';} } else { if(calcStr === '0' && val !== '.') calcStr = val; else calcStr += val; }
-        screen.innerText = calcStr;
+    function calcInput(v) {
+        const s = document.getElementById('calcScreen');
+        if(v==='C') calcStr='0'; else if(v==='±') calcStr = calcStr.startsWith('-')?calcStr.slice(1):'-'+calcStr;
+        else if(v==='%') calcStr = (parseFloat(eval(calcStr))/100).toString();
+        else if(v==='=') { try{ calcStr = eval(calcStr.replace('×','*').replace('÷','/')).toString(); }catch(e){calcStr='Error';} }
+        else { if(calcStr==='0'&&v!=='.') calcStr=v; else calcStr+=v; }
+        s.innerText = calcStr;
     }
 
-    // ---------------- 7. 单位换算 ----------------
-    const unitData = {
-        length: { m: 1, km: 1000, cm: 0.01, mm: 0.001, mile: 1609.34, ft: 0.3048 },
-        weight: { kg: 1, g: 0.001, lb: 0.453592, oz: 0.0283495 },
-        temp: { C: 1, F: 1.8, K: 1 },
-        volume: { L: 1, ml: 0.001, gal: 3.78541, cup: 0.236588 }
-    };
+    // 5. 单位换算
+    const unitData = { length: { m:1, km:1000, cm:0.01, mm:0.001 }, weight: { kg:1, g:0.001, lb:0.453592 }, temp: { C:1, F:1.8, K:1 }, volume:{ L:1, ml:0.001, gal:3.785 } };
     function updateUnitOptions() {
-        const type = document.getElementById('unitType').value; const keys = Object.keys(unitData[type]);
-        const from = document.getElementById('unitFrom'); const to = document.getElementById('unitTo');
-        from.innerHTML = to.innerHTML = keys.map(k => `<option value="${k}">${k}</option>`).join('');
-        to.value = keys[keys.length-1];
+        const t = document.getElementById('unitType').value; const k = Object.keys(unitData[t]);
+        const f = document.getElementById('unitFrom'), to = document.getElementById('unitTo');
+        f.innerHTML = to.innerHTML = k.map(k=>`<option value="${k}">${k}</option>`).join('');
+        to.value = k[1];
     }
     function convertUnit() {
-        const type = document.getElementById('unitType').value; const val = parseFloat(document.getElementById('unitVal').value);
-        const from = document.getElementById('unitFrom').value; const to = document.getElementById('unitTo').value;
-        if(isNaN(val)) return;
-        if(type === 'temp') {
-            let celsius; if(from === 'C') celsius = val; else if(from === 'F') celsius = (val - 32) * 5/9; else if(from === 'K') celsius = val - 273.15;
-            let result; if(to === 'C') result = celsius; else if(to === 'F') result = celsius * 9/5 + 32; else if(to === 'K') result = celsius + 273.15;
-            document.getElementById('unitResult').innerText = `${val} ${from} = ${result.toFixed(2)} ${to}`;
+        const t = document.getElementById('unitType').value, v = parseFloat(document.getElementById('unitVal').value);
+        const f = document.getElementById('unitFrom').value, to = document.getElementById('unitTo').value;
+        if(isNaN(v)) return;
+        if(t==='temp') {
+            let c = f==='C'?v:f==='F'?(v-32)*5/9:v-273.15;
+            let r = to==='C'?c:to==='F'?c*9/5+32:c+273.15;
+            document.getElementById('unitResult').innerText = `${v}${f} = ${r.toFixed(1)}${to}`;
         } else {
-            const base = val * unitData[type][from];
-            const result = base / unitData[type][to];
-            document.getElementById('unitResult').innerText = `${val} ${from} = ${result.toFixed(4)} ${to}`;
+            document.getElementById('unitResult').innerText = `${v}${f} = ${(v*unitData[t][f]/unitData[t][to]).toFixed(3)}${to}`;
         }
     }
     updateUnitOptions();
 
-    // ---------------- 8. 金句生成器 ----------------
-    function createRain(containerId, count=40) {
-        const container = document.getElementById(containerId); if(!container) return;
-        for(let i=0; i<count; i++) {
-            const drop = document.createElement('div'); drop.className = 'drop';
-            drop.style.left = Math.random() * 100 + '%';
-            drop.style.animationDuration = 0.5 + Math.random() * 0.5 + 's';
-            drop.style.animationDelay = Math.random() * 2 + 's';
-            drop.style.width = 1 + Math.random() + 'px';
-            container.appendChild(drop);
+    // 6. 3D 骰子
+    function rollDice(el) {
+        el.classList.remove('rolling'); void el.offsetWidth; el.classList.add('rolling');
+        setTimeout(() => { el.classList.remove('rolling'); }, 1500);
+    }
+
+    // 7. 老虎机随机数
+    function rollRandom() {
+        const el = document.getElementById('randomNumDisplay'); el.classList.add('rolling');
+        let count=0; const interval = setInterval(() => {
+            el.innerText = Math.floor(Math.random()*100);
+            count++; if(count>10) { clearInterval(interval); el.classList.remove('rolling'); }
+        }, 50);
+    }
+
+    // 8. 多语言金句（中英俄）
+    const quotePool = [
+        { text: "The world is quiet here.", trans: "世界在这里变得安静。", lang: "EN" },
+        { text: "Привет, мир.", trans: "你好，世界。", lang: "RU" },
+        { text: "生活是一首诗，你是韵脚。", trans: "Life is a poem, and you are the rhyme.", lang: "CN" },
+        { text: "Stay hungry, stay foolish.", trans: "求知若饥，虚心若愚。", lang: "EN" },
+        { text: "Это не конец.", trans: "这不是结局。", lang: "RU" },
+        { text: "雨停的时候，天就亮了。", trans: "When the rain stops, the sky clears.", lang: "CN" },
+        { text: "To be or not to be, that is the question.", trans: "生存还是毁灭，这是一个问题。", lang: "EN" },
+        { text: "Счастье внутри нас.", trans: "幸福存在于我们内心。", lang: "RU" },
+        { text: "极简的背后，是万无一失的克制。", trans: "Behind minimalism lies flawless restraint.", lang: "CN" },
+        { text: "The only way to do great work is to love what you do.", trans: "成就伟业的唯一途径是热爱你所做的事。", lang: "EN" },
+        { text: "Тишина — золото.", trans: "沉默是金。", lang: "RU" },
+        { text: "未来已来，只是分布不均。", trans: "The future is already here — it's just not evenly distributed.", lang: "CN" }
+    ];
+    let curQuoteIdx = -1;
+    function nextQuote() {
+        let idx; do { idx = Math.floor(Math.random()*quotePool.length); } while(idx === curQuoteIdx && quotePool.length > 1);
+        curQuoteIdx = idx; const q = quotePool[idx];
+        document.getElementById('quoteText').innerText = q.text;
+        document.getElementById('quoteTrans').innerText = q.trans;
+        document.getElementById('quoteLang').innerText = `[ ${q.lang} ]`;
+    }
+    nextQuote();
+
+    // 9. 图片调色
+    document.getElementById('imgInput').addEventListener('change', (e) => {
+        const file = e.target.files[0]; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = new Image(); img.onload = () => {
+                const canvas = document.createElement('canvas'); canvas.width=img.width; canvas.height=img.height;
+                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0);
+                document.getElementById('imgPreview').innerHTML = ''; document.getElementById('imgPreview').appendChild(canvas);
+            }; img.src = ev.target.result;
+        }; reader.readAsDataURL(file);
+    });
+
+    // 10. 备忘录（本地存储）
+    document.getElementById('memoText').value = localStorage.getItem('larryMemo') || '';
+    document.getElementById('memoText').addEventListener('input', function() { localStorage.setItem('larryMemo', this.value); });
+
+    // 11. 待办清单
+    function loadTodos() {
+        const d = JSON.parse(localStorage.getItem('larryTodos') || '[]');
+        document.getElementById('todoList').innerHTML = d.map((t,i) => `<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--card-border);"><span onclick="toggleTodo(${i})" style="flex:1;text-decoration:${t.done?'line-through':'none'};cursor:pointer;color:${t.done?'var(--text-sub)':'var(--text-main)'};">${t.text}</span><span onclick="deleteTodo(${i})" style="cursor:pointer;color:var(--text-sub);">✕</span></div>`).join('');
+    }
+    function saveTodos(d) { localStorage.setItem('larryTodos', JSON.stringify(d)); loadTodos(); }
+    function addTodo() { const i = document.getElementById('todoInput'); if(!i.value) return; const d = JSON.parse(localStorage.getItem('larryTodos')||'[]'); d.push({text:i.value,done:false}); saveTodos(d); i.value=''; }
+    function toggleTodo(i) { const d = JSON.parse(localStorage.getItem('larryTodos')||'[]'); d[i].done = !d[i].done; saveTodos(d); }
+    function deleteTodo(i) { const d = JSON.parse(localStorage.getItem('larryTodos')||'[]'); d.splice(i,1); saveTodos(d); }
+    loadTodos();
+
+    // 12. 打开问卷指引
+    function openSurvey() {
+        if(confirm('跳转到独立问卷页面？\n后续可追加新表单。')) {
+            window.location.href = 'https://larry-awa.github.io/L/survey.html';
         }
     }
-    createRain('rainBox', 30); createRain('rainBoxFull', 50);
 
-    const quotes = {
-        '忧郁': ['雨落在伦敦，心事落在你身上。', '雾霭沉沉的街道，适合想念一些没有结局的故事。', '窗外是灰蒙蒙的，心里是雾蒙蒙的。', '我们像雨一样，落下来，就不见了。'],
-        '高级': ['黑色是寂静的，金边是喧嚣的。', '极简的背后，是万无一失的克制。', '真正的奢华，是掌控时间。', '不必随波逐流，做黑金里唯一的焦点。'],
-        '文艺': ['生活是一场漫长的散文诗。', '黄昏是白昼与黑夜的窃窃私语。', '在雨声里读一本旧书。', '日子，不过是几个闪光的片刻。'],
-        '治愈': ['雨停的时候，天就亮了。', '去淋一场雨，然后变成云。', '闭上眼睛，聆听寂静的声音。', '每一步都算数，哪怕在雨里。'],
-        '微丧': ['好像什么事都提不起兴趣了。', '今天又是丧气满满的一天。', '这个世界很好，但不一定适合我。', '梦都醒了，雨还在下。']
-    };
-    let selectedTags = [];
-    function toggleTag(el) { el.classList.toggle('selected'); }
-    function generateQuote() {
-        const tags = document.querySelectorAll('.mood-tag.selected');
-        if(tags.length === 0) { document.getElementById('quoteResult').innerText = '请先选择一种氛围风格（蓝光触碰）。'; return; }
-        let pool = []; tags.forEach(t => { if(quotes[t.innerText.trim()]) pool = pool.concat(quotes[t.innerText.trim()]); });
-        if(pool.length === 0) pool = ['此刻适合沉默。'];
-        document.getElementById('quoteResult').innerText = pool[Math.floor(Math.random() * pool.length)];
-    }
-
-    // ---------------- 9. 盲盒工具 ----------------
-    function rollDice() {
-        const d = ['⚀','⚁','⚂','⚃','⚄','⚅']; document.getElementById('diceDisplay').innerText = d[Math.floor(Math.random() * 6)];
-    }
-    rollDice();
-
-    // ---------------- 10. 翻译工具 ----------------
-    async function translateText() {
-        const text = document.getElementById('transInput').value;
-        const from = document.getElementById('langFrom').value;
-        const to = document.getElementById('langTo').value;
-        const resultBox = document.getElementById('transResult');
-        if(!text.trim()) { resultBox.innerText = '请输入要翻译的文字'; return; }
-        resultBox.innerText = '翻译中...';
-        try {
-            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            if(data.responseData) {
-                resultBox.innerText = data.responseData.translatedText;
-            } else {
-                resultBox.innerText = '翻译失败，请稍后重试或更换语言。';
-            }
-        } catch (error) {
-            resultBox.innerText = '网络错误，请检查网络连接后重试。';
-        }
-    }
+    // 样式修补（浮层按钮悬停变色）
+    document.querySelectorAll('.calc-btn').forEach(b => b.style.cssText = 'background:transparent;border:1px solid var(--card-border);border-radius:8px;color:var(--text-main);padding:8px 0;cursor:pointer;');
+    document.querySelectorAll('.calc-btn').forEach(b => b.addEventListener('mouseover', function(){this.style.background='var(--gold-accent)';this.style.color='#000';}));
+    document.querySelectorAll('.calc-btn').forEach(b => b.addEventListener('mouseout', function(){this.style.background='transparent';this.style.color='var(--text-main)';}));
 </script>
 </body>
 </html>
