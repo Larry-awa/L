@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="author" content="Larry-awa">
     <title>朋友双面问卷</title>
+    <!-- 引入截图引擎 -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         body { background: #eff6ff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; position: relative; }
@@ -29,14 +31,11 @@
         
         .q-title { font-size: 17px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
         .q-hint { font-size: 13px; color: #2b7aff; font-weight: 500; margin-bottom: 18px; display: block; }
-        .q-hint.view-mode { color: #888; }
         
         .options { display: flex; flex-direction: column; gap: 10px; }
         .option-item { display: flex; align-items: center; background: #f8f9fa; border: 1.5px solid transparent; border-radius: 12px; padding: 12px 16px; cursor: pointer; transition: 0.2s; }
         .option-item:hover { background: #f0f2f5; }
         .option-item.selected { background: #eaf2ff; border-color: #2b7aff; }
-        .option-item.view-mode { pointer-events: none; opacity: 0.6; }
-        .option-item.view-mode.selected { opacity: 1; border-color: #a0c4ff; background: #eaf2ff; }
         .option-item .checkbox { width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 4px; margin-right: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; background: #fff; }
         .option-item.selected .checkbox { background: #2b7aff; border-color: #2b7aff; }
         .option-item.selected .checkbox::after { content: '✓'; color: #fff; font-size: 14px; font-weight: bold; }
@@ -50,8 +49,6 @@
         .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-submit { background: #ff6b4a; color: #fff; flex: 1; }
         .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-share { background: #2b7aff; color: #fff; width: 100%; margin-top: 10px; text-align: center; }
-        .btn-restart { background: #eef2f7; color: #1a1a1a; width: 100%; margin-top: 10px; }
         .step { font-size: 14px; color: #999; min-width: 60px; text-align: center; }
 
         .result-page { display: none; animation: fade 0.4s; }
@@ -60,7 +57,8 @@
         .result-item .r-q { font-weight: 600; font-size: 15px; color: #1a1a1a; margin-bottom: 6px; }
         .result-item .r-a { color: #555; font-size: 14px; line-height: 1.6; }
         
-        .view-mode-banner { display: none; background: #f9f1e6; padding: 8px 12px; border-radius: 12px; font-size: 13px; color: #8c6b4a; margin-bottom: 16px; text-align: center; border: 1px solid #e7d5c0; }
+        .btn-split-screenshot { background: #2b7aff; color: #fff; width: 100%; margin-top: 10px; text-align: center; }
+        .btn-restart { background: #eef2f7; color: #1a1a1a; width: 100%; margin-top: 10px; }
         
         .footer-note { text-align: center; margin-top: 30px; font-size: 13px; color: #888; letter-spacing: 0.5px; }
         .designer-name { color: #1e40af; }
@@ -76,8 +74,6 @@
         <button class="mode-btn" id="modeYou" onclick="switchMode('you')">📝 你眼中的自己</button>
     </div>
 
-    <div class="view-mode-banner" id="viewBanner">🔒 当前为“已答结果”查看模式，无法修改</div>
-
     <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
     <div id="questionsWrapper">
         <div id="questionContainer"></div>
@@ -89,7 +85,7 @@
     </div>
     <div class="result-page" id="resultPage">
         <div id="resultContent"></div>
-        <button class="btn btn-share" id="shareBtn">📋 生成只读链接（复制分享）</button>
+        <button class="btn btn-split-screenshot" id="splitScreenshotBtn">📸 生成双段截图 (自动平分)</button>
         <button class="btn btn-restart" id="restartBtn">重新测一次</button>
     </div>
     <div class="footer-note">· 问卷设计 <span class="designer-name">Larry-awa</span></div>
@@ -144,13 +140,12 @@ const questionsYou = [
 let currentMode = 'me';
 let currentIndex = 0;
 let answers = [];
-let isViewMode = false;
 
 function getQuestions() { return currentMode === 'me' ? questionsMe : questionsYou; }
 function resetAnswers() { answers = Array.from({length: getQuestions().length}, ()=>[]); }
 
 function switchMode(mode) {
-    if(mode === currentMode || isViewMode) return;
+    if(mode === currentMode) return;
     currentMode = mode;
     document.getElementById('modeMe').classList.toggle('active', mode === 'me');
     document.getElementById('modeYou').classList.toggle('active', mode === 'you');
@@ -169,63 +164,39 @@ function switchMode(mode) {
 const qc = document.getElementById('questionContainer'), pb = document.getElementById('progressBar');
 const prev = document.getElementById('prevBtn'), next = document.getElementById('nextBtn'), step = document.getElementById('stepIndicator');
 const resPage = document.getElementById('resultPage'), wrap = document.getElementById('questionsWrapper');
-const viewBanner = document.getElementById('viewBanner');
 
 function renderQuestion(idx){
     const qs = getQuestions();
     const q = qs[idx], sel = answers[idx];
-    
-    // 如果处于只读查看模式，隐藏进度和导航
-    if(isViewMode) {
-        document.getElementById('questionsWrapper').style.display = 'block';
-        document.querySelector('.nav').style.display = 'none';
-        document.getElementById('progressBar').style.width = '100%'; // 直接拉满进度条
-        // 隐藏提交按钮
-        const sb = document.querySelector('.btn-submit');
-        if(sb) sb.style.display = 'none';
-        document.getElementById('modeMe').disabled = true;
-        document.getElementById('modeYou').disabled = true;
-    }
-
-    let html = `<div class="question-card active"><div class="q-title">${idx+1}. ${q.text}</div><span class="q-hint ${isViewMode?'view-mode':''}">${isViewMode?'已选答案，仅可查看':'最多选 ' + q.max + ' 项'}</span><div class="options">`;
+    let html = `<div class="question-card active"><div class="q-title">${idx+1}. ${q.text}</div><span class="q-hint">最多选 ${q.max} 项</span><div class="options">`;
     q.options.forEach((o, i) => {
         const v = o, checked = sel.includes(v);
-        let cls = checked?'selected':'';
-        if(isViewMode) cls += ' view-mode';
-        html += `<div class="option-item ${cls}" data-idx="${idx}" data-val="${v}"><div class="checkbox"></div><span class="text">${v}</span></div>`;
+        html += `<div class="option-item ${checked?'selected':''}" data-idx="${idx}" data-val="${v}"><div class="checkbox"></div><span class="text">${v}</span></div>`;
     });
     html += `</div></div>`;
     qc.innerHTML = html;
     step.textContent = `${idx+1} / ${qs.length}`;
     
-    if(!isViewMode) {
-        updateButtons();
-        document.querySelectorAll('.option-item').forEach(el => {
-            el.addEventListener('click', function() {
-                const qsI = getQuestions();
-                const idx = parseInt(this.dataset.idx), val = this.dataset.val, max = qsI[idx].max;
-                if (max === 1) {
-                    answers[idx] = [val];
-                    renderQuestion(idx);
-                    return;
-                }
-                let arr = answers[idx];
-                if(arr.includes(val)){
-                    answers[idx] = arr.filter(v => v !== val);
-                } else {
-                    if(arr.length >= max) { alert(`此题最多只能选 ${max} 项哦`); return; }
-                    answers[idx] = [...arr, val];
-                }
+    updateButtons();
+    document.querySelectorAll('.option-item').forEach(el => {
+        el.addEventListener('click', function() {
+            const qsI = getQuestions();
+            const idx = parseInt(this.dataset.idx), val = this.dataset.val, max = qsI[idx].max;
+            if (max === 1) {
+                answers[idx] = [val];
                 renderQuestion(idx);
-            });
+                return;
+            }
+            let arr = answers[idx];
+            if(arr.includes(val)){
+                answers[idx] = arr.filter(v => v !== val);
+            } else {
+                if(arr.length >= max) { alert(`此题最多只能选 ${max} 项哦`); return; }
+                answers[idx] = [...arr, val];
+            }
+            renderQuestion(idx);
         });
-    } else {
-        document.getElementById('prevBtn').disabled = true;
-        document.getElementById('nextBtn').style.display = 'none';
-        document.querySelector('.btn-submit')?.remove();
-        document.getElementById('modeMe').disabled = true;
-        document.getElementById('modeYou').disabled = true;
-    }
+    });
     updateProgress();
 }
 
@@ -239,7 +210,7 @@ function updateButtons(){
         if(!btn){ 
             btn = document.createElement('button'); 
             btn.className = 'btn btn-submit'; 
-            btn.textContent = '提交并生成只读链接'; 
+            btn.textContent = '提交并生成分段截图'; 
             const nav = document.querySelector('.nav'); 
             nav.insertBefore(btn, document.getElementById('stepIndicator')); 
             btn.onclick = submit; 
@@ -257,10 +228,9 @@ function updateButtons(){
 function updateProgress(){
     const qs = getQuestions();
     const cnt = answers.filter(a => a.length > 0).length;
-    if(!isViewMode) pb.style.width = Math.min((cnt/qs.length)*100, 100) + '%';
+    pb.style.width = Math.min((cnt/qs.length)*100, 100) + '%';
 }
 
-// 核心提交与分享逻辑（替换截图）
 function submit(){
     const qs = getQuestions();
     if(answers.some(a => a.length === 0)){ alert('还有题目没选完，请检查'); return; }
@@ -274,80 +244,85 @@ function submit(){
     });
     document.getElementById('resultContent').innerHTML = html;
     
-    document.getElementById('shareBtn').onclick = function() {
-        const state = { type: currentMode, ans: answers };
-        // 使用 btoa 进行 base64 编码，将答案存入链接
-        const encoded = btoa(JSON.stringify(state));
-        const shareUrl = window.location.origin + window.location.pathname + '?view=' + encodeURIComponent(encoded);
-        
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                alert('✅ 只读结果链接已复制！\n发到微信，朋友打开就能看到你的答案，且无法修改。');
-            }).catch(() => {
-                prompt('复制失败，请手动复制下面的链接：', shareUrl);
-            });
-        } else {
-            prompt('复制失败，请手动复制下面的链接：', shareUrl);
+    // ✅ 动态均分 + Blob 流式截图逻辑（完美适配15题和20题）
+    document.getElementById('splitScreenshotBtn').onclick = async function() {
+        // 防御：微信断网导致截图库加载失败
+        if (typeof html2canvas === 'undefined') {
+            alert('⚠️ 截图库加载失败，请长按屏幕选择“系统长截图”保存，或者尝试连接WiFi后刷新页面。');
+            return;
         }
+
+        const items = document.querySelectorAll('.result-item');
+        if (items.length === 0) return;
+
+        // 动态计算总题数，自动一分为二
+        const totalItems = items.length;
+        const splitIndex = Math.floor(totalItems / 2); 
+
+        const btn = this;
+        btn.textContent = '⏳ 正在截取第一部分...';
+        btn.disabled = true;
+
+        // 截图函数
+        async function capturePart(startIdx, endIdx, fileName) {
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'position:absolute;left:-9999px;top:0;width:100%;max-width:600px;background:#fff;padding:24px 20px 32px;border-radius:24px;';
+            
+            // 拷贝标题
+            const titleClone = document.createElement('div');
+            titleClone.style.cssText = 'text-align:center;margin-bottom:16px;font-weight:600;color:#2b7aff;font-size:16px;';
+            const titleNode = document.querySelector('#resultContent > div');
+            if (titleNode) { titleClone.textContent = titleNode.textContent; }
+            wrapper.appendChild(titleClone);
+
+            for (let i = startIdx; i < endIdx && i < items.length; i++) {
+                wrapper.appendChild(items[i].cloneNode(true));
+            }
+            document.body.appendChild(wrapper);
+
+            try {
+                const canvas = await html2canvas(wrapper, { scale: 2, useCORS: true, backgroundColor: '#ffffff', width: wrapper.scrollWidth, height: wrapper.scrollHeight });
+                
+                // ✅ 改用 Blob 方式下载（避免长截图生成超长字符导致手机内存溢出）
+                canvas.toBlob(function(blob) {
+                    const link = document.createElement('a');
+                    link.download = fileName;
+                    link.href = URL.createObjectURL(blob);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    // 释放内存
+                    setTimeout(() => { URL.revokeObjectURL(link.href); }, 100);
+                });
+            } catch (err) {
+                alert('截图生成失败，请使用手机自带的“滚动长截图”功能。');
+                console.error(err);
+            } finally {
+                document.body.removeChild(wrapper);
+            }
+        }
+
+        // 第一步截图：1 到 splitIndex
+        await capturePart(0, splitIndex, `朋友问卷结果_1-${splitIndex}.png`);
+        
+        btn.textContent = '⏳ 正在截取第二部分...';
+        await new Promise(r => setTimeout(r, 800));
+
+        // 第二步截图：splitIndex + 1 到 最后
+        await capturePart(splitIndex, totalItems, `朋友问卷结果_${splitIndex+1}-${totalItems}.png`);
+
+        btn.textContent = '📸 生成双段截图 (自动平分)';
+        btn.disabled = false;
+        alert(`✅ 两张高清截图已自动平分生成！\n第一张：1-${splitIndex}题，第二张：${splitIndex+1}-${totalItems}题。\n直接发给微信好友，完美展示带勾选的结果！`);
     };
 }
 
-prev.onclick = ()=> { if(currentIndex>0 && !isViewMode){ currentIndex--; renderQuestion(currentIndex); } };
-next.onclick = ()=> { if(currentIndex<getQuestions().length-1 && answers[currentIndex].length>0 && !isViewMode){ currentIndex++; renderQuestion(currentIndex); } };
-document.getElementById('restartBtn').onclick = ()=> { if(!isViewMode){ resetAnswers(); currentIndex=0; resPage.classList.remove('active'); wrap.style.display='block'; renderQuestion(0); pb.style.width = '0%'; } };
+prev.onclick = ()=> { if(currentIndex>0){ currentIndex--; renderQuestion(currentIndex); } };
+next.onclick = ()=> { if(currentIndex<getQuestions().length-1 && answers[currentIndex].length>0){ currentIndex++; renderQuestion(currentIndex); } };
+document.getElementById('restartBtn').onclick = ()=> { resetAnswers(); currentIndex=0; resPage.classList.remove('active'); wrap.style.display='block'; renderQuestion(0); pb.style.width = '0%'; };
 
-// 启动与读取URL参数
-function init() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const viewData = urlParams.get('view');
-    
-    if (viewData) {
-        try {
-            const decoded = JSON.parse(atob(decodeURIComponent(viewData)));
-            if (decoded.type && decoded.ans) {
-                isViewMode = true;
-                viewBanner.style.display = 'block';
-                currentMode = decoded.type;
-                const qs = getQuestions();
-                answers = decoded.ans;
-                if(answers.length !== qs.length) {
-                    const newAns = Array.from({length: qs.length}, ()=>[]);
-                    for(let i=0; i<Math.min(answers.length, qs.length); i++) {
-                        newAns[i] = answers[i].filter(v => qs[i].options.includes(v));
-                    }
-                    answers = newAns;
-                }
-                document.getElementById('modeMe').classList.toggle('active', currentMode === 'me');
-                document.getElementById('modeYou').classList.toggle('active', currentMode === 'you');
-                document.getElementById('modeMe').disabled = true;
-                document.getElementById('modeYou').disabled = true;
-                
-                document.getElementById('questionsWrapper').style.display = 'block';
-                document.querySelector('.nav').style.display = 'none';
-                const sb = document.querySelector('.btn-submit');
-                if(sb) sb.style.display = 'none';
-                wrap.style.display = 'none'; resPage.classList.add('active');
-                let html = '';
-                const modeName = currentMode === 'me' ? '第一套·你眼中的我' : '第二套·你眼中的自己';
-                html += `<div style="text-align:center;margin-bottom:16px;font-weight:600;color:#2b7aff;">✦ ${modeName} 已答结果 ✦</div>`;
-                qs.forEach((q, i) => {
-                    const ans = answers[i].join('、') || '未作答';
-                    html += `<div class="result-item"><div class="r-q">${i+1}. ${q.text}</div><div class="r-a">${ans}</div></div>`;
-                });
-                document.getElementById('resultContent').innerHTML = html;
-                document.getElementById('shareBtn').style.display = 'none';
-                document.getElementById('restartBtn').style.display = 'none';
-                document.getElementById('progressBar').style.width = '100%'; // 进度条满格
-                return;
-            }
-        } catch (e) {
-            console.log('解析只读链接失败，进入普通模式');
-        }
-    }
-    resetAnswers();
-    renderQuestion(0);
-}
-init();
+resetAnswers();
+renderQuestion(0);
 </script>
 </body>
 </html>
