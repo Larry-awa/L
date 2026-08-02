@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="author" content="Larry-awa">
     <title>朋友双面问卷</title>
-    <!-- 引入截图引擎，并增加微信兼容性 loading -->
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         body { background: #eff6ff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; position: relative; }
@@ -31,11 +29,14 @@
         
         .q-title { font-size: 17px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px; }
         .q-hint { font-size: 13px; color: #2b7aff; font-weight: 500; margin-bottom: 18px; display: block; }
+        .q-hint.view-mode { color: #888; }
         
         .options { display: flex; flex-direction: column; gap: 10px; }
         .option-item { display: flex; align-items: center; background: #f8f9fa; border: 1.5px solid transparent; border-radius: 12px; padding: 12px 16px; cursor: pointer; transition: 0.2s; }
         .option-item:hover { background: #f0f2f5; }
         .option-item.selected { background: #eaf2ff; border-color: #2b7aff; }
+        .option-item.view-mode { pointer-events: none; opacity: 0.6; }
+        .option-item.view-mode.selected { opacity: 1; border-color: #a0c4ff; background: #eaf2ff; }
         .option-item .checkbox { width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 4px; margin-right: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; background: #fff; }
         .option-item.selected .checkbox { background: #2b7aff; border-color: #2b7aff; }
         .option-item.selected .checkbox::after { content: '✓'; color: #fff; font-size: 14px; font-weight: bold; }
@@ -49,6 +50,8 @@
         .btn-next:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-submit { background: #ff6b4a; color: #fff; flex: 1; }
         .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-share { background: #2b7aff; color: #fff; width: 100%; margin-top: 10px; text-align: center; }
+        .btn-restart { background: #eef2f7; color: #1a1a1a; width: 100%; margin-top: 10px; }
         .step { font-size: 14px; color: #999; min-width: 60px; text-align: center; }
 
         .result-page { display: none; animation: fade 0.4s; }
@@ -57,8 +60,7 @@
         .result-item .r-q { font-weight: 600; font-size: 15px; color: #1a1a1a; margin-bottom: 6px; }
         .result-item .r-a { color: #555; font-size: 14px; line-height: 1.6; }
         
-        .btn-screenshot { background: #2b7aff; color: #fff; width: 100%; margin-top: 10px; text-align: center; }
-        .btn-restart { background: #eef2f7; color: #1a1a1a; width: 100%; margin-top: 10px; }
+        .view-mode-banner { display: none; background: #f9f1e6; padding: 8px 12px; border-radius: 12px; font-size: 13px; color: #8c6b4a; margin-bottom: 16px; text-align: center; border: 1px solid #e7d5c0; }
         
         .footer-note { text-align: center; margin-top: 30px; font-size: 13px; color: #888; letter-spacing: 0.5px; }
         .designer-name { color: #1e40af; }
@@ -74,6 +76,8 @@
         <button class="mode-btn" id="modeYou" onclick="switchMode('you')">📝 你眼中的自己</button>
     </div>
 
+    <div class="view-mode-banner" id="viewBanner">🔒 当前为“已答结果”查看模式，无法修改</div>
+
     <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
     <div id="questionsWrapper">
         <div id="questionContainer"></div>
@@ -85,7 +89,7 @@
     </div>
     <div class="result-page" id="resultPage">
         <div id="resultContent"></div>
-        <button class="btn btn-screenshot" id="screenshotBtn">📸 生成结果截图（保存图片）</button>
+        <button class="btn btn-share" id="shareBtn">📋 生成只读链接（复制分享）</button>
         <button class="btn btn-restart" id="restartBtn">重新测一次</button>
     </div>
     <div class="footer-note">· 问卷设计 <span class="designer-name">Larry-awa</span></div>
@@ -140,12 +144,13 @@ const questionsYou = [
 let currentMode = 'me';
 let currentIndex = 0;
 let answers = [];
+let isViewMode = false;
 
 function getQuestions() { return currentMode === 'me' ? questionsMe : questionsYou; }
 function resetAnswers() { answers = Array.from({length: getQuestions().length}, ()=>[]); }
 
 function switchMode(mode) {
-    if(mode === currentMode) return;
+    if(mode === currentMode || isViewMode) return;
     currentMode = mode;
     document.getElementById('modeMe').classList.toggle('active', mode === 'me');
     document.getElementById('modeYou').classList.toggle('active', mode === 'you');
@@ -164,44 +169,63 @@ function switchMode(mode) {
 const qc = document.getElementById('questionContainer'), pb = document.getElementById('progressBar');
 const prev = document.getElementById('prevBtn'), next = document.getElementById('nextBtn'), step = document.getElementById('stepIndicator');
 const resPage = document.getElementById('resultPage'), wrap = document.getElementById('questionsWrapper');
+const viewBanner = document.getElementById('viewBanner');
 
 function renderQuestion(idx){
     const qs = getQuestions();
     const q = qs[idx], sel = answers[idx];
-    let html = `<div class="question-card active"><div class="q-title">${idx+1}. ${q.text}</div><span class="q-hint">最多选 ${q.max} 项</span><div class="options">`;
+    
+    // 如果处于只读查看模式，隐藏进度和导航
+    if(isViewMode) {
+        document.getElementById('questionsWrapper').style.display = 'block';
+        document.querySelector('.nav').style.display = 'none';
+        document.getElementById('progressBar').style.width = '100%'; // 直接拉满进度条
+        // 隐藏提交按钮
+        const sb = document.querySelector('.btn-submit');
+        if(sb) sb.style.display = 'none';
+        document.getElementById('modeMe').disabled = true;
+        document.getElementById('modeYou').disabled = true;
+    }
+
+    let html = `<div class="question-card active"><div class="q-title">${idx+1}. ${q.text}</div><span class="q-hint ${isViewMode?'view-mode':''}">${isViewMode?'已选答案，仅可查看':'最多选 ' + q.max + ' 项'}</span><div class="options">`;
     q.options.forEach((o, i) => {
         const v = o, checked = sel.includes(v);
-        html += `<div class="option-item ${checked?'selected':''}" data-idx="${idx}" data-val="${v}"><div class="checkbox"></div><span class="text">${v}</span></div>`;
+        let cls = checked?'selected':'';
+        if(isViewMode) cls += ' view-mode';
+        html += `<div class="option-item ${cls}" data-idx="${idx}" data-val="${v}"><div class="checkbox"></div><span class="text">${v}</span></div>`;
     });
     html += `</div></div>`;
     qc.innerHTML = html;
     step.textContent = `${idx+1} / ${qs.length}`;
     
-    updateButtons();
-    // 绑定点击事件
-    document.querySelectorAll('.option-item').forEach(el => {
-        el.addEventListener('click', function() {
-            const qsI = getQuestions();
-            const idx = parseInt(this.dataset.idx), val = this.dataset.val, max = qsI[idx].max;
-            
-            // 【新增特殊逻辑】如果是单选（最多选1项），点哪个直接替换成哪个，无需先取消
-            if (max === 1) {
-                answers[idx] = [val];
+    if(!isViewMode) {
+        updateButtons();
+        document.querySelectorAll('.option-item').forEach(el => {
+            el.addEventListener('click', function() {
+                const qsI = getQuestions();
+                const idx = parseInt(this.dataset.idx), val = this.dataset.val, max = qsI[idx].max;
+                if (max === 1) {
+                    answers[idx] = [val];
+                    renderQuestion(idx);
+                    return;
+                }
+                let arr = answers[idx];
+                if(arr.includes(val)){
+                    answers[idx] = arr.filter(v => v !== val);
+                } else {
+                    if(arr.length >= max) { alert(`此题最多只能选 ${max} 项哦`); return; }
+                    answers[idx] = [...arr, val];
+                }
                 renderQuestion(idx);
-                return;
-            }
-            
-            // 原有多选逻辑保持不变
-            let arr = answers[idx];
-            if(arr.includes(val)){
-                answers[idx] = arr.filter(v => v !== val);
-            } else {
-                if(arr.length >= max) { alert(`此题最多只能选 ${max} 项哦`); return; }
-                answers[idx] = [...arr, val];
-            }
-            renderQuestion(idx);
+            });
         });
-    });
+    } else {
+        document.getElementById('prevBtn').disabled = true;
+        document.getElementById('nextBtn').style.display = 'none';
+        document.querySelector('.btn-submit')?.remove();
+        document.getElementById('modeMe').disabled = true;
+        document.getElementById('modeYou').disabled = true;
+    }
     updateProgress();
 }
 
@@ -215,7 +239,7 @@ function updateButtons(){
         if(!btn){ 
             btn = document.createElement('button'); 
             btn.className = 'btn btn-submit'; 
-            btn.textContent = '提交并生成截图'; 
+            btn.textContent = '提交并生成只读链接'; 
             const nav = document.querySelector('.nav'); 
             nav.insertBefore(btn, document.getElementById('stepIndicator')); 
             btn.onclick = submit; 
@@ -233,10 +257,10 @@ function updateButtons(){
 function updateProgress(){
     const qs = getQuestions();
     const cnt = answers.filter(a => a.length > 0).length;
-    pb.style.width = Math.min((cnt/qs.length)*100, 100) + '%';
+    if(!isViewMode) pb.style.width = Math.min((cnt/qs.length)*100, 100) + '%';
 }
 
-// 核心提交与截图逻辑
+// 核心提交与分享逻辑（替换截图）
 function submit(){
     const qs = getQuestions();
     if(answers.some(a => a.length === 0)){ alert('还有题目没选完，请检查'); return; }
@@ -250,60 +274,80 @@ function submit(){
     });
     document.getElementById('resultContent').innerHTML = html;
     
-    // 生成截图的功能，适配微信
-    document.getElementById('screenshotBtn').onclick = function() {
-        // 检查 html2canvas 库是否加载成功
-        if (typeof html2canvas === 'undefined') {
-            alert('⚠️ 截图库加载失败（微信浏览器网络波动）。\n请在页面右上角点击【...】，选择“在浏览器中打开”，再重新截图。\n或者直接使用手机自带的【滚动截图】功能。');
-            return;
-        }
-
-        const target = document.getElementById('resultContent');
-        if (!target) return;
+    document.getElementById('shareBtn').onclick = function() {
+        const state = { type: currentMode, ans: answers };
+        // 使用 btoa 进行 base64 编码，将答案存入链接
+        const encoded = btoa(JSON.stringify(state));
+        const shareUrl = window.location.origin + window.location.pathname + '?view=' + encodeURIComponent(encoded);
         
-        const btn = this;
-        const originalText = btn.textContent;
-        btn.textContent = '⏳ 正在生成高清截图...';
-        btn.disabled = true;
-
-        // 使用 html2canvas 截取
-        html2canvas(target, {
-            scale: 2, // 提高清晰度，适合手机屏幕查看
-            useCORS: true,
-            backgroundColor: '#ffffff',
-            logging: false,
-            width: target.scrollWidth,
-            height: target.scrollHeight,
-            windowWidth: target.scrollWidth
-        }).then(canvas => {
-            // 触发下载
-            const link = document.createElement('a');
-            link.download = `朋友问卷结果_${modeName}.png`;
-            link.href = canvas.toDataURL('image/png');
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            btn.textContent = originalText;
-            btn.disabled = false;
-            alert('✅ 高清截图已生成并下载！\n直接发送这张图片给微信好友，完美展示！');
-        }).catch(err => {
-            console.error(err);
-            // 微信环境下有时候 Canvas 过大或跨域会导致异常，提醒用户直接系统截图
-            alert('⚠️ 自动生成长截图失败（微信浏览器限制）。\n请使用手机自带的【滚动长截图/截屏】功能截取当前结果。');
-            btn.textContent = originalText;
-            btn.disabled = false;
-        });
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert('✅ 只读结果链接已复制！\n发到微信，朋友打开就能看到你的答案，且无法修改。');
+            }).catch(() => {
+                prompt('复制失败，请手动复制下面的链接：', shareUrl);
+            });
+        } else {
+            prompt('复制失败，请手动复制下面的链接：', shareUrl);
+        }
     };
 }
 
-prev.onclick = ()=> { if(currentIndex>0){ currentIndex--; renderQuestion(currentIndex); } };
-next.onclick = ()=> { if(currentIndex<getQuestions().length-1 && answers[currentIndex].length>0){ currentIndex++; renderQuestion(currentIndex); } };
-document.getElementById('restartBtn').onclick = ()=> { resetAnswers(); currentIndex=0; resPage.classList.remove('active'); wrap.style.display='block'; renderQuestion(0); pb.style.width = '0%'; };
+prev.onclick = ()=> { if(currentIndex>0 && !isViewMode){ currentIndex--; renderQuestion(currentIndex); } };
+next.onclick = ()=> { if(currentIndex<getQuestions().length-1 && answers[currentIndex].length>0 && !isViewMode){ currentIndex++; renderQuestion(currentIndex); } };
+document.getElementById('restartBtn').onclick = ()=> { if(!isViewMode){ resetAnswers(); currentIndex=0; resPage.classList.remove('active'); wrap.style.display='block'; renderQuestion(0); pb.style.width = '0%'; } };
 
-// 初始化启动
-resetAnswers();
-renderQuestion(0);
+// 启动与读取URL参数
+function init() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewData = urlParams.get('view');
+    
+    if (viewData) {
+        try {
+            const decoded = JSON.parse(atob(decodeURIComponent(viewData)));
+            if (decoded.type && decoded.ans) {
+                isViewMode = true;
+                viewBanner.style.display = 'block';
+                currentMode = decoded.type;
+                const qs = getQuestions();
+                answers = decoded.ans;
+                if(answers.length !== qs.length) {
+                    const newAns = Array.from({length: qs.length}, ()=>[]);
+                    for(let i=0; i<Math.min(answers.length, qs.length); i++) {
+                        newAns[i] = answers[i].filter(v => qs[i].options.includes(v));
+                    }
+                    answers = newAns;
+                }
+                document.getElementById('modeMe').classList.toggle('active', currentMode === 'me');
+                document.getElementById('modeYou').classList.toggle('active', currentMode === 'you');
+                document.getElementById('modeMe').disabled = true;
+                document.getElementById('modeYou').disabled = true;
+                
+                document.getElementById('questionsWrapper').style.display = 'block';
+                document.querySelector('.nav').style.display = 'none';
+                const sb = document.querySelector('.btn-submit');
+                if(sb) sb.style.display = 'none';
+                wrap.style.display = 'none'; resPage.classList.add('active');
+                let html = '';
+                const modeName = currentMode === 'me' ? '第一套·你眼中的我' : '第二套·你眼中的自己';
+                html += `<div style="text-align:center;margin-bottom:16px;font-weight:600;color:#2b7aff;">✦ ${modeName} 已答结果 ✦</div>`;
+                qs.forEach((q, i) => {
+                    const ans = answers[i].join('、') || '未作答';
+                    html += `<div class="result-item"><div class="r-q">${i+1}. ${q.text}</div><div class="r-a">${ans}</div></div>`;
+                });
+                document.getElementById('resultContent').innerHTML = html;
+                document.getElementById('shareBtn').style.display = 'none';
+                document.getElementById('restartBtn').style.display = 'none';
+                document.getElementById('progressBar').style.width = '100%'; // 进度条满格
+                return;
+            }
+        } catch (e) {
+            console.log('解析只读链接失败，进入普通模式');
+        }
+    }
+    resetAnswers();
+    renderQuestion(0);
+}
+init();
 </script>
 </body>
 </html>
