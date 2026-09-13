@@ -1,5 +1,5 @@
 /* Larry 工作台 · Service Worker */
-var CACHE_NAME = 'larry-workbench-v3.7.0';
+var CACHE_NAME = 'larry-workbench-v3.7.2';
 var CORE_ASSETS = [
   './',
   './index.html',

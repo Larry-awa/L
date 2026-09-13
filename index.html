@@ -743,6 +743,7 @@ body.theme-transition *::after{
         <div class="seg-item" data-mode="image">图片模式</div>
       </div>
       <div class="pill-btn" id="subToggle">浅色</div>
+      <div class="pill-btn" id="installBtn" style="display:none;">安装</div>
       <div class="pill-btn" id="importBtn">导图</div>
     </div>
   </div>
@@ -819,7 +820,7 @@ body.theme-transition *::after{
   </div>
 
   <div class="footer">
-    <div class="ver">版本号：3.7.0</div>
+    <div class="ver">版本号：3.7.2</div>
     <div class="coming">敬请期待</div>
   </div>
 </div>
@@ -847,9 +848,10 @@ body.theme-transition *::after{
 
 var presetBackgrounds = ['1.jpg','2.jpg','3.jpg','4.jpg','5.jpg','6.jpg','7.jpg','8.jpg','9.jpg','10.jpg'];
 var WEATHER_CITY = '北京', WEATHER_LAT = 39.9042, WEATHER_LON = 116.4074;
-var VERSION = '3.7.0';
+var VERSION = '3.7.2';
 
 var currentMode = 'color', colorTheme = 'light', presetIndex = -1, userBgBlob = null;
+var bgCache = {};
 
 function $(id){ return document.getElementById(id); }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
@@ -871,7 +873,11 @@ function compressImage(file, maxW, q){ maxW = maxW || 1920; q = q || 0.85; retur
 
 /* 背景层 */
 var bgLayer = $('bgLayer'), currentBlobUrl = null;
-function setBgFromUrl(url){ if (currentBlobUrl){ URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; } bgLayer.style.backgroundImage = 'url("' + url + '")'; bgLayer.classList.add('active'); }
+function setBgFromUrl(url){
+  if (currentBlobUrl){ URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; }
+  var src = (typeof bgCache !== 'undefined' && bgCache[url]) ? bgCache[url] : url;
+  bgLayer.style.backgroundImage = 'url("' + src + '")';
+  bgLayer.classList.add('active');}
 function setBgFromBlob(blob){ if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = URL.createObjectURL(blob); bgLayer.style.backgroundImage = 'url("' + currentBlobUrl + '")'; bgLayer.classList.add('active'); }
 function clearBgImage(){ if (currentBlobUrl){ URL.revokeObjectURL(currentBlobUrl); currentBlobUrl = null; } bgLayer.style.backgroundImage = ''; bgLayer.classList.remove('active'); }
 
@@ -957,7 +963,51 @@ fileInput.addEventListener('change', function(e){
   compressImage(file, 1920, .85).then(function(blob){ return saveBgToDB(blob).then(function(){ return blob; }); }).then(function(blob){ userBgBlob = blob; setBgFromBlob(blob); if (currentMode !== 'image') setMode('image'); else applyState(); showToast('已保存到本设备'); }).catch(function(){ try { userBgBlob = file; setBgFromBlob(file); setMode('image'); showToast('已应用'); } catch(err){ showToast('处理失败'); } });
   fileInput.value = '';
 });
-
+/* PWA 安装 */
+var installBtn = $('installBtn'), deferredPrompt = null;
+function isStandalone(){
+  return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+         window.navigator.standalone === true;
+}
+function isIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+if (installBtn && !isStandalone()){
+  if (isIOS()){
+    // iOS Safari 不支持 beforeinstallprompt，改为引导
+    installBtn.style.display = '';
+    installBtn.addEventListener('click', function(){
+      openPopup('添加到主屏幕',
+        '<div style="font-size:14px;line-height:2.1;color:var(--text-main);padding:8px 0;">' +
+          '<p>1. 点击底部中央的 <b>分享按钮</b> ⬆️</p>' +
+          '<p>2. 在弹出菜单里往下找，选 <b>「添加到主屏幕」</b></p>' +
+          '<p>3. 点右上角 <b>「添加」</b> 就完成了</p>' +
+          '<p style="margin-top:14px;font-size:12px;color:var(--text-sub);">如果找不到分享按钮，请把页面往上滑一点。</p>' +
+        '</div>'
+      );
+    });
+  } else {
+    window.addEventListener('beforeinstallprompt', function(e){
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = '';
+    });
+    installBtn.addEventListener('click', function(){
+      if (!deferredPrompt){ showToast('浏览器暂不支持，或已安装'); return; }
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(choice){
+        if (choice.outcome === 'accepted') showToast('正在安装…');
+        else showToast('已取消');
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      });
+    });
+    window.addEventListener('appinstalled', function(){
+      installBtn.style.display = 'none';
+      showToast('已添加到桌面');
+    });
+  }
+}
 /* 弹窗 */
 var popupOverlay = $('popupOverlay'), popupTitle = $('popupTitle'), popupContent = $('popupContent');
 var popupCloseTimer = null;
@@ -1455,7 +1505,7 @@ function reportMBTI(res){
     '<div class="report-badge">TEST REPORT</div>' +
     '<div class="report-main-title">' + typeStr + ' · ' + info.tag + '</div>' +
     '<div class="report-subtitle">' + info.line + '</div>' +
-    '<div class="report-tags">' + tagHTML('内向 ' + (eP < 50 ? Math.round(100-eP) : eP) + '%').replace('内向', eP<50?'内向':'内向') + '</div>' +
+    '<div class="report-tags">' + tagHTML((eP < 50 ? '内向 ' + Math.round(100-eP) : '外向 ' + eP) + '%') + '</div>' +
   '</div>';
 
   html += sectionHTML('维度倾向',
@@ -3000,45 +3050,37 @@ loadWeather();
 loadQuotes();
 updateTodoSummary();
 updatePomoSummary();
-
-/* 后台预加载背景图（首次访问 3 秒后悄悄下载，让 SW 缓存） */
-window.addEventListener('load', function(){
-  setTimeout(function(){
-    presetBackgrounds.forEach(function(url){
-      var img = new Image();
-      img.src = url;
+/* 后台预加载背景图：串行下载 + blob 内存缓存，切图秒开 */
+function preloadBackgrounds(){
+  var queue = presetBackgrounds.slice();
+  // 优先加载当前正在显示的那张
+  if (presetIndex >= 0 && presetBackgrounds[presetIndex]){
+    var cur = presetBackgrounds[presetIndex];
+    var ci = queue.indexOf(cur);
+    if (ci > 0){ queue.splice(ci, 1); queue.unshift(cur); }
+  }
+  function next(){
+    if (!queue.length) return;
+    var url = queue.shift();
+    if (bgCache[url]){ next(); return; }
+    fetch(url).then(function(r){
+      if (!r.ok) throw new Error();
+      return r.blob();
+    }).then(function(blob){
+      bgCache[url] = URL.createObjectURL(blob);
+    }).catch(function(){}).then(function(){
+      // 间隔 250ms，避免 CDN 并发限流
+      setTimeout(next, 250);
     });
-  }, 3000);
-});
+  }
+  next();
+}
 
-/* 防盗 */
-document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-document.addEventListener('dragstart', function(e){ if (e.target.tagName === 'IMG') e.preventDefault(); });
-document.addEventListener('keydown', function(e){
-  if (e.key === 'F12'){ e.preventDefault(); return false; }
-  if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')){ e.preventDefault(); return false; }
-  if (e.ctrlKey && (e.key === 'u' || e.key === 'U')){ e.preventDefault(); return false; }
-});
-
-})();
-</script>
-
-<script>
-/* PWA Service Worker 注册 */
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js').then(function(reg){
-      reg.onupdatefound = function(){
-        var n = reg.installing;
-        if (!n) return;
-        n.onstatechange = function(){
-          if (n.state === 'installed' && navigator.serviceWorker.controller){
-            console.log('[PWA] 新版本已就绪，下次刷新生效');
-          }
-        };
-      };
-    }).catch(function(err){ console.log('[PWA] SW 注册失败：', err); });
-  });
+// 页面空闲时立即开始（不等到 3 秒）
+if ('requestIdleCallback' in window){
+  requestIdleCallback(preloadBackgrounds, { timeout: 2000 });
+} else {
+  window.addEventListener('load', function(){ setTimeout(preloadBackgrounds, 500); });
 }
 </script>
 </body>
