@@ -819,7 +819,7 @@ body.theme-transition *::after{
   </div>
 
   <div class="footer">
-    <div class="ver">版本号：3.7.1</div>
+    <div class="ver">版本号：3.7.0</div>
     <div class="coming">敬请期待</div>
   </div>
 </div>
@@ -1455,7 +1455,7 @@ function reportMBTI(res){
     '<div class="report-badge">TEST REPORT</div>' +
     '<div class="report-main-title">' + typeStr + ' · ' + info.tag + '</div>' +
     '<div class="report-subtitle">' + info.line + '</div>' +
-    '<div class="report-tags">' + tagHTML((eP < 50 ? '内向 ' + Math.round(100-eP) : '外向 ' + eP) + '%') + '</div>' +
+    '<div class="report-tags">' + tagHTML('内向 ' + (eP < 50 ? Math.round(100-eP) : eP) + '%').replace('内向', eP<50?'内向':'内向') + '</div>' +
   '</div>';
 
   html += sectionHTML('维度倾向',
@@ -2995,16 +2995,16 @@ document.querySelectorAll('.grid-item').forEach(function(card){
 });
 
 /* 启动 */
-loadBgFromDB().then(function函数(blob){ if (blob){ userBgBlob = blob; setMode('image'); } else { setMode('color'); } });
+loadBgFromDB().then(function(blob){ if (blob){ userBgBlob = blob; setMode('image'); } else { setMode('color'); } });
 loadWeather();
 loadQuotes();
 updateTodoSummary();
 updatePomoSummary();
 
 /* 后台预加载背景图（首次访问 3 秒后悄悄下载，让 SW 缓存） */
-window.addEventListener('load', function函数(){
-  setTimeout(function函数(){
-    presetBackgrounds.forEach(function函数(url){
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    presetBackgrounds.forEach(function(url){
       var img = new Image();
       img.src = url;
     });
@@ -3012,12 +3012,12 @@ window.addEventListener('load', function函数(){
 });
 
 /* 防盗 */
-document.addEventListener添加事件监听器('contextmenu', function函数(e){ e.preventDefault(); });文档.addEventListener添加事件监听器('contextmenu', 函数(e){ e.preventDefault(); });
-document.addEventListener添加事件监听器('dragstart', function(e){ if (e.target.tagName === 'IMG') e.preventDefault(); });文档.addEventListener添加事件监听器('dragstart', 函数e){ 如果目标标签名等于'IMG'则调用preventDefault; };
-document.addEventListener添加事件监听器('keydown', function函数(e){文档.addEventListener添加事件监听器('keydown', 函数(e){
-  if (e.key === 'F12'){ e.preventDefault(); return false; }  如果 (e.key === 'F12'){ e.preventDefault(); return false; }
-  if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')){ e.preventDefault(); return false; }  如果 (e.ctrlKey && e.shiftKey && (e.键 === 'I' || e.键 === 'J' || e.键 === 'C')){ e.阻止默认行为(); 返回 假; }
-  if (e.ctrlKey && (e.key === 'u' || e.key === 'U')){ e.preventDefault(); return false; }  如果 (e.ctrlKey && (e.键 === 'u' || e.键 === 'U')){ e.阻止默认行为(); 返回 假; }
+document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+document.addEventListener('dragstart', function(e){ if (e.target.tagName === 'IMG') e.preventDefault(); });
+document.addEventListener('keydown', function(e){
+  if (e.key === 'F12'){ e.preventDefault(); return false; }
+  if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')){ e.preventDefault(); return false; }
+  if (e.ctrlKey && (e.key === 'u' || e.key === 'U')){ e.preventDefault(); return false; }
 });
 
 })();
@@ -3025,19 +3025,19 @@ document.addEventListener添加事件监听器('keydown', function函数(e){文�
 
 <script>
 /* PWA Service Worker 注册 */
-if ('serviceWorker' in在 navigator && (location位置.protocol === 'https:' || location位置.hostname === 'localhost' || location位置.hostname === '127.0.0.1')){
-  window.addEventListener添加事件监听器('load', function(){  窗口.addEventListener添加事件监听器('load', 函数(){
-    navigator.serviceWorker.register('sw.js').then然后(function函数(reg){
-      reg.onupdatefound = function函数(){
-        var变量 n = reg.installing;
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      reg.onupdatefound = function(){
+        var n = reg.installing;
         if (!n) return;
-        n.onstatechange = function函数(){
-          if (n.state === 'installed' && navigator.serviceWorkerServiceWorker.controller){
+        n.onstatechange = function(){
+          if (n.state === 'installed' && navigator.serviceWorker.controller){
             console.log('[PWA] 新版本已就绪，下次刷新生效');
           }
         };
       };
-    }).catch(function函数(err){ console.log('[PWA] SW 注册失败：', err); });
+    }).catch(function(err){ console.log('[PWA] SW 注册失败：', err); });
   });
 }
 </script>
