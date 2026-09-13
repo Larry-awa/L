@@ -13,6 +13,44 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 
+/* ============ 引文字体：按语种分离 ============ */
+@font-face {
+  font-family: 'LarryQuote';
+  src: local('Baskerville Old Face'),
+       local('Baskerville'),
+       local('Iowan Old Style'),
+       local('Bodoni MT'),
+       local('Bodoni 72'),
+       local('Didot'),
+       local('Georgia');
+  unicode-range: U+0020-007F, U+00A0-00FF, U+0100-017F, U+2000-206F, U+2070-209F, U+20A0-20CF, U+2100-214F, U+2190-21FF;
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LarryQuote';
+  src: local('Constantia'),
+       local('Cambria'),
+       local('PT Serif'),
+       local('Georgia');
+  unicode-range: U+0301, U+0400-045F, U+0483-0489, U+0490-0491, U+04B0-04B1, U+04D0-04FF, U+0500-052F, U+2116, U+2DE0-2DFF, U+A640-A69F;
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LarryQuote';
+  src: local('KaiTi'),
+       local('STKaiti'),
+       local('Kaiti SC'),
+       local('楷体');
+  unicode-range: U+3000-303F, U+3400-4DBF, U+4E00-9FFF, U+F900-FAFF, U+FF00-FFEF;
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root{
   --bg-base:#f5f3ed;
   --card-bg:linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.58));
@@ -67,7 +105,7 @@ body{
   overflow-y:auto;overflow-x:hidden;
 }
 
-.bg-layer{position:fixed;inset:0;z-index:-2;background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed;opacity:0;transition:opacity .6s ease;pointer-events:none;}
+.bg-layer{position:fixed;inset:0;z-index:-2;background-size:cover;background-position:center;background-repeat:no-repeat;opacity:0;transition:opacity .25s ease;pointer-events:none;will-change:opacity;}
 body.image-mode .bg-layer.active{opacity:1;}
 body.dark-mode .bg-layer.active{opacity:0;}
 body.dark-mode:not(.image-mode)::before{content:'';position:fixed;inset:0;z-index:-3;background:linear-gradient(180deg,#1a1a1a,#0a0a0a);}
@@ -78,6 +116,46 @@ body.dark-mode:not(.image-mode)::before{content:'';position:fixed;inset:0;z-inde
 .top-bar h1{font-size:22px;font-weight:600;letter-spacing:.5px;color:var(--text-main);transition:color .4s;}
 .top-bar .signature{font-style:italic;font-size:15px;color:var(--accent);margin-top:6px;transition:color .4s;}
 .top-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+
+/* 问候语 chip */
+.greet-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:5px 14px;
+  border-radius:40px;
+  background:linear-gradient(135deg, rgba(255,246,232,.92), rgba(244,234,214,.78));
+  border:1px solid rgba(178,157,122,.28);
+  font-size:12px;
+  font-weight:600;
+  color:#8b7355;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  white-space:nowrap;
+  user-select:none;
+  transition:background .3s ease, border-color .3s ease, color .3s ease;
+}
+.greet-text{color:#a8926e;letter-spacing:.3px;}
+.greet-time{
+  font-family:'SF Mono','Cascadia Mono',Consolas,Menlo,monospace;
+  font-variant-numeric:tabular-nums;
+  color:#5c4a32;
+  letter-spacing:.3px;
+}
+body.dark-mode .greet-chip{
+  background:linear-gradient(135deg, rgba(48,42,30,.78), rgba(22,20,14,.6));
+  border-color:rgba(212,175,55,.28);
+  color:#d4af37;
+}
+body.dark-mode .greet-text{color:#d4af37;}
+body.dark-mode .greet-time{color:#f0f0f0;}
+body.image-mode .greet-chip{
+  background:linear-gradient(135deg, rgba(200,215,235,.22), rgba(200,215,235,.09));
+  border-color:rgba(200,215,235,.38);
+  color:#fff;
+}
+body.image-mode .greet-text{color:rgba(220,232,245,.95);}
+body.image-mode .greet-time{color:#fff;}
 
 .pill-btn{position:relative;background:var(--grad-pill);border:1px solid var(--card-border);padding:5px 12px;border-radius:40px;font-size:12px;font-weight:600;color:var(--text-sub);cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .2s, box-shadow .3s;-webkit-tap-highlight-color:transparent;white-space:nowrap;}
 .pill-btn:hover{transform:scale(1.03);box-shadow:0 4px 14px rgba(0,0,0,.1);}
@@ -101,7 +179,6 @@ body.dark-mode:not(.image-mode)::before{content:'';position:fixed;inset:0;z-inde
 .card-icon svg{width:100%;height:100%;display:block;}
 .grid-item:hover .card-icon{transform:scale(1.18) rotate(-6deg);color:var(--accent);}
 
-/* 卡片 hover 光扫 */
 .grid-item::before{
   content:'';position:absolute;inset:0;
   background:linear-gradient(115deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%);
@@ -117,7 +194,6 @@ body.dark-mode .grid-item::before{
 body.image-mode .grid-item::before{
   background:linear-gradient(115deg, transparent 35%, rgba(200,215,235,.16) 50%, transparent 65%);
 }
-/* 保证卡片内容在光扫之上 */
 .grid-item .card-header,
 .grid-item .card-body,
 .grid-item > div:not(.card-header):not(.card-body){position:relative;z-index:2;}
@@ -167,7 +243,7 @@ body.image-mode .sk-line{
   to{opacity:1;transform:translateY(0);}
 }
 
-.weather-temp{font-size:30px;font-weight:300;line-height:1;color:var(--text-main);letter-spacing:-1px;}
+.weather-temp{font-size:30px;font-weight:300;line-height:1;color:var(--text-main);letter-spacing:-1px;font-family:'SF Mono','Cascadia Mono',Consolas,Menlo,monospace;font-variant-numeric:tabular-nums;}
 .weather-desc{font-size:11px;color:var(--text-sub);margin-top:4px;}
 .cal-mini{font-size:11px;color:var(--text-sub);margin-top:2px;}
 
@@ -214,7 +290,8 @@ body.image-mode .sk-line{
 .popup-box::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg, transparent, var(--accent), transparent);opacity:.55;pointer-events:none;}
 .popup-box::after{content:'';position:absolute;top:-80px;right:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle, var(--accent-soft), transparent 70%);opacity:.9;pointer-events:none;z-index:0;}
 .popup-box > *{position:relative;z-index:1;}
-.popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;position:sticky;top:-26px;background:inherit;padding:6px 0;z-index:3;}
+.popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;position:sticky;top:0;background:inherit;padding:22px 28px 14px;z-index:3;}
+#popupContent{padding:0 28px 26px;}
 .popup-title{font-size:17px;font-weight:600;letter-spacing:.3px;}
 
 body.image-mode .popup-overlay{background:rgba(0,0,0,.18);}
@@ -225,7 +302,8 @@ body.image-mode .popup-box{
   --accent:rgba(200,215,235,.95);--accent-soft:rgba(200,215,235,.14);
   --hover-border:rgba(200,215,235,.65);
   background:linear-gradient(160deg, rgba(25,28,35,.7), rgba(12,14,18,.6));
-  backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
   border:1px solid rgba(255,255,255,.12);color:#fff;
 }
 
@@ -241,12 +319,28 @@ body.image-mode .btn-secondary{background:rgba(255,255,255,.06);border-color:rgb
 
 /* 引文 */
 .quote-text{
-  font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
-  font-style:italic;font-size:26px;line-height:1.7;color:var(--text-main);font-weight:400;
+  font-family:'LarryQuote', Georgia, "KaiTi", "STKaiti", "楷体", serif;
+  font-style:italic;
+  font-size:26px;
+  line-height:1.7;
+  color:var(--text-main);
+  font-weight:400;
 }
-.quote-text .cn{font-family:"KaiTi","STKaiti","Kaiti SC","楷体",serif;font-style:normal;}
-.quote-trans{font-size:14px;color:var(--text-sub);margin-top:14px;line-height:1.6;}
-.quote-source{font-size:12px;color:var(--text-sub);margin-top:16px;opacity:.75;}
+.quote-text .cn{
+  font-family:'LarryQuote', "KaiTi", "STKaiti", "Kaiti SC", "楷体", serif;
+}
+.quote-trans{
+  font-family:'LarryQuote', Georgia, "KaiTi", "STKaiti", "楷体", serif;
+  font-style:normal;
+  font-size:14px;
+  color:var(--text-sub);
+  margin-top:14px;
+  line-height:1.6;
+}
+.quote-trans .cn{
+  font-family:'LarryQuote', "KaiTi", "STKaiti", "Kaiti SC", "楷体", serif;
+}
+.quote-source{font-family:'LarryQuote', Georgia, "KaiTi", "STKaiti", "楷体", serif;font-style:normal;font-size:12px;color:var(--text-sub);margin-top:16px;opacity:.75;}
 .quote-hint{font-size:11px;color:var(--text-sub);margin-top:22px;opacity:.5;}
 
 /* 待办 */
@@ -273,19 +367,51 @@ body.image-mode .todo-text{color:#fff;}
 .test-q-title{font-size:15px;font-weight:600;margin-bottom:14px;line-height:1.5;}
 .test-progress{height:4px;background:rgba(128,128,128,.15);border-radius:4px;margin-bottom:20px;overflow:hidden;}
 .test-progress-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .3s;width:0%;}
-.test-opt{padding:12px 16px;border-radius:12px;border:1px solid var(--card-border);font-size:14px;cursor:pointer;margin-bottom:8px;transition:.2s;}
+.test-opt{padding:12px 14px;border-radius:12px;border:1px solid var(--card-border);font-size:14px;cursor:pointer;margin-bottom:8px;transition:.2s;display:flex;align-items:center;gap:10px;line-height:1.5;}
 .test-opt:hover{border-color:var(--hover-border);}
 .test-opt.selected{border-color:var(--accent);background:var(--accent-soft);}
+.test-opt .opt-mark{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--text-sub);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s;font-size:11px;color:transparent;font-weight:700;}
+.test-opt.selected .opt-mark{border-color:var(--accent);background:var(--accent);color:#000;}
+.test-opt.selected .opt-mark::after{content:'✓';}
 .test-nav{display:flex;gap:8px;margin-top:16px;align-items:center;}
-.test-step{font-size:12px;color:var(--text-sub);}
+.test-step{font-size:12px;color:var(--text-sub);margin-left:auto;font-family:'Iowan Old Style',Georgia,serif;font-variant-numeric:tabular-nums;}
 
-.test-report{padding:24px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:16px;text-align:center;position:relative;overflow:hidden;}
-.test-report::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg, transparent, var(--accent), transparent);}
-.test-report .report-badge{font-size:11px;color:var(--accent);letter-spacing:2px;margin-bottom:14px;}
-.test-report .report-title{font-size:22px;font-weight:700;color:var(--accent);margin-bottom:14px;font-family:'Iowan Old Style',Georgia,serif;}
-.test-report .report-body{font-size:13px;color:var(--text-sub);line-height:1.8;text-align:left;padding:12px 0;border-top:1px dashed var(--card-border);border-bottom:1px dashed var(--card-border);}
-.test-report .report-foot{margin-top:14px;font-size:10px;color:var(--text-sub);opacity:.6;letter-spacing:1px;}
-
+/* 测试报告 */
+.test-report{padding:2px 0 0;}
+.report-head{text-align:center;padding:6px 0 24px;border-bottom:1px solid var(--card-border);}
+.report-badge{font-size:11px;color:var(--accent);letter-spacing:3px;margin-bottom:12px;font-family:'Iowan Old Style',Georgia,serif;}
+.report-main-title{font-size:26px;font-weight:700;color:var(--text-main);font-family:'Iowan Old Style',Georgia,serif;letter-spacing:.3px;line-height:1.3;}
+.report-subtitle{font-size:13px;color:var(--text-sub);margin-top:10px;line-height:1.7;font-style:italic;}
+.report-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:14px;}
+.report-tag{display:inline-block;padding:4px 12px;border-radius:20px;background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600;letter-spacing:.5px;}
+.report-section{margin-top:24px;}
+.report-section-title{font-size:12px;color:var(--accent);letter-spacing:3px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-family:'Iowan Old Style',Georgia,serif;}
+.report-section-title::before{content:'';width:16px;height:1px;background:var(--accent);flex-shrink:0;}
+.report-section-title::after{content:'';flex:1;height:1px;background:var(--card-border);}
+.report-text{font-size:13px;color:var(--text-main);line-height:1.9;}
+.report-text + .report-text{margin-top:8px;}
+.report-list{list-style:none;padding:0;margin:0;}
+.report-list li{font-size:13px;color:var(--text-main);line-height:1.75;padding:7px 0 7px 20px;position:relative;}
+.report-list li::before{content:'';position:absolute;left:2px;top:16px;width:8px;height:1px;background:var(--accent);}
+.report-bar-item{margin-bottom:18px;}
+.report-bar-item:last-child{margin-bottom:0;}
+.report-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text-sub);margin-bottom:8px;}
+.report-bar-label .on{color:var(--text-main);font-weight:600;}
+.report-bar-track{position:relative;height:6px;background:var(--accent-soft);border-radius:6px;overflow:hidden;}
+.report-bar-left{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:6px;width:0;transition:width .7s cubic-bezier(.16,1,.3,1);}
+.report-bar-num{display:flex;justify-content:space-between;font-size:11px;color:var(--text-sub);margin-top:5px;font-family:'Iowan Old Style',Georgia,serif;font-variant-numeric:tabular-nums;}
+.report-score-big{text-align:center;padding:12px 0 8px;}
+.report-score-num{font-size:72px;font-weight:200;color:var(--accent);font-family:'Iowan Old Style',Georgia,serif;line-height:1;letter-spacing:-3px;font-variant-numeric:lining-nums tabular-nums;font-feature-settings:'lnum' 1, 'tnum' 1;}
+.report-score-total{font-size:20px;color:var(--text-sub);font-family:'Iowan Old Style',Georgia,serif;margin-left:4px;}
+.report-score-label{font-size:12px;color:var(--text-sub);margin-top:12px;letter-spacing:3px;font-family:'Iowan Old Style',Georgia,serif;}
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.report-grid-item{padding:14px 16px;border:1px solid var(--card-border);border-radius:12px;background:var(--card-bg);}
+.report-grid-item .lbl{font-size:11px;color:var(--text-sub);letter-spacing:1px;}
+.report-grid-item .val{font-size:22px;color:var(--text-main);font-weight:600;font-family:'Iowan Old Style',Georgia,serif;margin-top:6px;font-variant-numeric:lining-nums tabular-nums;font-feature-settings:'lnum' 1, 'tnum' 1;line-height:1;}
+.report-grid-item .sub{font-size:11px;color:var(--text-sub);margin-top:4px;}
+.report-foot{margin-top:28px;padding-top:18px;border-top:1px dashed var(--card-border);text-align:center;font-size:11px;color:var(--text-sub);opacity:.6;letter-spacing:2px;font-family:'Iowan Old Style',Georgia,serif;}
+.report-disclaimer{margin-top:14px;font-size:11px;color:var(--text-sub);opacity:.55;line-height:1.7;text-align:center;}
+@media(max-width:480px){.report-grid{grid-template-columns:1fr;}}
 /* 密码 */
 .pwd-display{font-family:'Iowan Old Style',Georgia,monospace;font-size:18px;font-weight:700;text-align:center;padding:16px;border-radius:12px;background:var(--accent-soft);word-break:break-all;letter-spacing:1px;margin-bottom:14px;}
 .pwd-controls{display:flex;gap:10px;margin-bottom:14px;}
@@ -319,14 +445,25 @@ body.image-mode .todo-text{color:#fff;}
 .pomo-ring .pomo-bg{stroke:rgba(128,128,128,.15);}
 .pomo-ring .pomo-fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset 1s linear;}
 .pomo-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
-.pomo-display{font-size:48px;font-weight:200;font-family:'Iowan Old Style',Georgia,monospace;color:var(--text-main);margin:0;letter-spacing:2px;}
+.pomo-display{
+  font-size:48px;
+  font-weight:300;
+  font-family:ui-monospace,'SF Mono',Menlo,Consolas,'Courier New',monospace;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:'tnum';
+  color:var(--text-main);
+  margin:0;
+  letter-spacing:0;
+  width:170px;
+  text-align:center;
+}
 .pomo-modes{display:flex;gap:8px;justify-content:center;margin:20px 0 22px;}
 .pomo-mode{padding:6px 16px;border-radius:20px;border:1px solid var(--card-border);background:transparent;color:var(--text-sub);font-size:12px;cursor:pointer;font-family:inherit;transition:.2s;}
 .pomo-mode.active{background:var(--accent);color:#000;border-color:var(--accent);}
 .pomo-actions{display:flex;gap:10px;justify-content:center;}
 .pomo-actions button{min-width:110px;}
 
-/* 计算器（扩展） */
+/* 计算器 */
 .calc-screen{text-align:right;font-size:32px;font-family:'Iowan Old Style',Georgia,monospace;padding:8px 0;min-height:44px;margin-bottom:12px;color:var(--text-main);word-break:break-all;}
 .calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .calc-btn{padding:12px 0;border:1px solid var(--card-border);border-radius:14px;background:var(--card-bg);color:var(--text-main);font-size:16px;cursor:pointer;transition:.2s;font-family:'Iowan Old Style',Georgia,inherit;backdrop-filter:blur(6px);}
@@ -356,14 +493,135 @@ body.image-mode .flip-digit::before{background:rgba(0,0,0,.18);}
 .count-label{font-size:13px;color:var(--text-sub);text-align:center;margin-top:4px;}
 .count-empty{text-align:center;color:var(--text-sub);font-size:13px;padding:30px 0;}
 
+/* 纪念日 */
+.count-date-row{display:flex;align-items:center;justify-content:center;gap:5px;}
+.count-sel{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  padding:10px 26px 10px 14px;
+  border-radius:12px;
+  border:1px solid var(--card-border);
+  background:transparent;
+  color:var(--text-main);
+  font-size:15px;
+  font-family:'Iowan Old Style',Georgia,serif;
+  font-variant-numeric:tabular-nums;
+  outline:none;
+  cursor:pointer;
+  text-align:center;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 9 6'><path d='M1 1l3.5 3.5L8 1' fill='none' stroke='%23888888' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;
+  background-position:right 9px center;
+  transition:border-color .2s;
+}
+.count-sel:hover,.count-sel:focus{border-color:var(--accent);}
+.count-sel option{background:#1a1a1a;color:#f0f0f0;}
+body.image-mode .count-sel option{background:#1a1d24;color:#fff;}
+.count-year{min-width:92px;}
+.count-month,.count-day{min-width:62px;}
+.count-sep{font-size:12px;color:var(--text-sub);}
+
+/* 数字与单位对齐：底部对齐，数字大、单位小但不歪 */
+.count-result{
+  display:flex;
+  align-items:baseline;
+  justify-content:center;
+  gap:0;
+  flex-wrap:wrap;
+  margin-top:8px;
+  line-height:1;
+}
+.count-num{
+  font-size:40px;
+  font-weight:300;
+  color:var(--text-main);
+  font-family:'Iowan Old Style',Georgia,serif;
+  font-variant-numeric:lining-nums tabular-nums;
+  font-feature-settings:'lnum' 1, 'tnum' 1;
+  line-height:1;
+  letter-spacing:-1px;
+}
+.count-unit{
+  font-size:14px;
+  color:var(--text-sub);
+  margin:0 10px 0 4px;
+  font-family:'Iowan Old Style',Georgia,serif;
+  line-height:1;
+}
+/* 纪念日列表 */
+.count-list-head{font-size:11px;color:var(--text-sub);letter-spacing:2px;margin:24px 0 8px;padding-top:18px;border-top:1px solid var(--card-border);}
+.count-item{padding:16px 0;border-bottom:1px solid var(--card-border);}
+.count-item:last-child{border-bottom:none;}
+.count-item-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.count-item-name{font-size:14px;font-weight:600;color:var(--text-main);flex:1;word-break:break-all;}
+.count-item-date{font-size:11px;color:var(--text-sub);font-family:'Iowan Old Style',Georgia,serif;font-variant-numeric:tabular-nums;flex-shrink:0;}
+.count-del{background:transparent;border:none;color:var(--text-sub);font-size:18px;line-height:1;padding:0 4px;cursor:pointer;transition:color .2s;flex-shrink:0;font-family:inherit;}
+.count-del:hover{color:#e74c3c;}
+.count-empty-list{text-align:center;color:var(--text-sub);font-size:13px;padding:20px 0;opacity:.6;}
+
+/* 去掉 number input 的旧式上下箭头 */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
+input[type=number]{
+  -moz-appearance:textfield;
+}
+
 /* 日历 */
 .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.cal-title{font-size:16px;font-weight:600;}
+.cal-nav{
+  width:34px;height:34px;border-radius:50%;border:1px solid var(--card-border);
+  background:transparent;color:var(--text-main);font-size:20px;line-height:1;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:.2s;font-family:inherit;padding:0 0 2px;
+}
+.cal-nav:hover{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);}
+.cal-title{font-size:16px;font-weight:600;flex:1;text-align:center;}
+
+.cal-day{
+  padding:6px 2px 4px;text-align:center;border-radius:8px;cursor:pointer;transition:.15s;
+  display:flex;flex-direction:column;align-items:center;gap:1px;min-height:42px;
+}
+.cal-day-num{font-size:12px;line-height:1;font-variant-numeric:tabular-nums;}
+.cal-holiday{font-size:9px;color:var(--accent);font-weight:600;line-height:1;opacity:.9;transform:scale(.92);}
+
+/* 今天 = 淡底色 + 描边 */
+.cal-day.today{
+  background:var(--accent-soft);
+  border:1px solid var(--accent);
+  color:var(--accent);
+  font-weight:700;
+}
+.cal-day.today:hover{
+  background:rgba(178,157,122,.22);
+}
+body.dark-mode .cal-day.today:hover{
+  background:rgba(212,175,55,.24);
+}
+.cal-day.today .cal-holiday{color:var(--accent);}
+
+/* 选中 = 实底色 */
+.cal-day.selected,
+.cal-day.selected-today{
+  background:var(--accent);
+  color:#fff;
+  font-weight:700;
+  box-shadow:0 2px 8px var(--accent-soft);
+}
+.cal-day.selected .cal-holiday,
+.cal-day.selected-today .cal-holiday{color:rgba(255,255,255,.9);}
+
+/* 悬停 */
+.cal-day:hover{background:var(--accent-soft);}
+.cal-day.selected:hover,
+.cal-day.selected-today:hover{background:var(--accent);}
+
+body.image-mode .cal-day.today{border-color:var(--accent);color:var(--accent);}
+body.image-mode .cal-day.selected,
+body.image-mode .cal-day.selected-today{color:#1a1a1a;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:12px;}
 .cal-weekday{color:var(--text-sub);padding:6px 0;text-align:center;font-weight:600;}
-.cal-day{padding:8px 0;text-align:center;border-radius:8px;cursor:pointer;transition:.15s;}
-.cal-day:hover{background:var(--accent-soft);}
-.cal-day.selected{background:var(--accent);color:#000;font-weight:700;box-shadow:0 2px 8px var(--accent-soft);}
 .cal-day.other{opacity:.28;}
 .cal-info{margin-top:16px;padding-top:16px;border-top:1px solid var(--card-border);}
 .cal-info-row{display:flex;gap:12px;font-size:13px;margin-bottom:8px;}
@@ -440,10 +698,11 @@ body.image-mode .mind-node.depth-3{background:linear-gradient(135deg, rgba(255,2
   .top-right{width:100%;}
   .top-bar h1{font-size:22px;}
   .top-bar .signature{font-size:15px;margin-top:8px;}
-  .popup-box{padding:20px;border-radius:20px;max-height:88vh;}
+  .popup-header{padding:18px 20px 12px;}
+  #popupContent{padding:0 20px 20px;}
   .popup-box::after{display:none;}
   .quote-text{font-size:20px;}
-  .pomo-display{font-size:44px;}
+  .pomo-display{font-size:40px;width:140px;}
   .flip-digit{width:44px;height:64px;font-size:40px;}
   .calc-screen{font-size:26px;}
   .weather-temp{font-size:30px;}
@@ -474,6 +733,10 @@ body.theme-transition *::after{
       <div class="signature">— Larry · Orion · Nereus</div>
     </div>
     <div class="top-right">
+      <div class="greet-chip" id="greetChip">
+        <span class="greet-text" id="greetText">你好</span>
+        <span class="greet-time" id="greetTime">--:--</span>
+      </div>
       <div class="pill-btn" id="dateBadge">--</div>
       <div class="segment" id="modeSegment">
         <div class="seg-item active" data-mode="color">颜色模式</div>
@@ -540,8 +803,8 @@ body.theme-transition *::after{
     </div>
 
     <div class="grid-item card-count" data-module="countdown">
-      <div class="card-header"><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2"/></svg></span><span>倒计时</span></div>
-      <div class="card-body">滚轮选日期</div>
+      <div class="card-header"><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2"/></svg></span><span>纪念日</span></div>
+      <div class="card-body">正计时 · 倒计时</div>
     </div>
 
     <div class="grid-item card-cal" data-module="calendar">
@@ -551,12 +814,12 @@ body.theme-transition *::after{
 
     <div class="grid-item card-tools" data-module="tools">
       <div class="card-header"><span class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span><span>工具台</span></div>
-      <div class="card-body">调色 · 随机 · 颜色 · 二维码</div>
+      <div class="card-body">10+ 工具 · 编解码 · 备份</div>
     </div>
   </div>
 
   <div class="footer">
-    <div class="ver">版本号：3.5.0</div>
+    <div class="ver">版本号：3.7.0</div>
     <div class="coming">敬请期待</div>
   </div>
 </div>
@@ -584,7 +847,7 @@ body.theme-transition *::after{
 
 var presetBackgrounds = ['1.jpg','2.jpg','3.jpg','4.jpg','5.jpg','6.jpg','7.jpg','8.jpg','9.jpg','10.jpg'];
 var WEATHER_CITY = '北京', WEATHER_LAT = 39.9042, WEATHER_LON = 116.4074;
-var VERSION = '3.5.0';
+var VERSION = '3.7.0';
 
 var currentMode = 'color', colorTheme = 'light', presetIndex = -1, userBgBlob = null;
 
@@ -624,6 +887,26 @@ function formatLunar(date){ if (!lunarFormatter) return formatSolar(date); try {
 function updateDateDisplay(){ var now = new Date(); dateBadge.textContent = isLunar ? formatLunar(now) : formatSolar(now); }
 dateBadge.addEventListener('click', function(){ isLunar = !isLunar; updateDateDisplay(); });
 updateDateDisplay();
+
+/* 问候语 + 时间 */
+function updateGreeting(){
+  var now = new Date();
+  var h = now.getHours();
+  var m = now.getMinutes();
+  var greet;
+  if (h >= 5 && h < 9) greet = '早上好';
+  else if (h >= 9 && h < 12) greet = '上午好';
+  else if (h >= 12 && h < 14) greet = '中午好';
+  else if (h >= 14 && h < 18) greet = '下午好';
+  else if (h >= 18 && h < 23) greet = '晚上好';
+  else greet = '夜深了';
+  var gt = document.getElementById('greetText');
+  var gm = document.getElementById('greetTime');
+  if (gt) gt.textContent = greet;
+  if (gm) gm.textContent = (h<10?'0':'')+h + ':' + (m<10?'0':'')+m;
+}
+updateGreeting();
+setInterval(updateGreeting, 10000);
 
 /* 模式切换 */
 var modeSegment = $('modeSegment'), segItems = modeSegment.querySelectorAll('.seg-item'), subToggle = $('subToggle');
@@ -691,7 +974,11 @@ function closePopup(){
     popupContent.innerHTML = '';
   }, 260);
 }
-popupOverlay.addEventListener('click', function(e){ if (e.target === popupOverlay) closePopup(); });
+var popupDownOnOverlay = false;
+popupOverlay.addEventListener('pointerdown', function(e){ popupDownOnOverlay = (e.target === popupOverlay); });
+popupOverlay.addEventListener('click', function(e){
+  if (e.target === popupOverlay && popupDownOnOverlay) closePopup();
+});
 document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && popupOverlay.classList.contains('show')) closePopup(); });
 
 /* 天气 */
@@ -702,7 +989,7 @@ var weatherData = null, weatherDaily = null, weatherAir = null;
 
 /* ========== 天气缓存（30 分钟） ========== */
 var WEATHER_CACHE_KEY = 'larryWeatherCache';
-var WEATHER_CACHE_TTL = 30 * 60 * 1000; // 30 分钟
+var WEATHER_CACHE_TTL = 30 * 60 * 1000;
 
 function readWeatherCache(){
   try {
@@ -710,7 +997,7 @@ function readWeatherCache(){
     if (!raw) return null;
     var c = JSON.parse(raw);
     if (!c || !c.ts || !c.data) return null;
-    if (Date.now() - c.ts > WEATHER_CACHE_TTL) return null; // 过期
+    if (Date.now() - c.ts > WEATHER_CACHE_TTL) return null;
     return c.data;
   } catch(e){ return null; }
 }
@@ -724,20 +1011,17 @@ function applyWeatherData(d){
   weatherDaily = d.daily;
   weatherAir = d.air;
   renderWeatherCard();
-  // 如果天气弹窗正好开着，刷新它
   if (popupOverlay.classList.contains('show') && popupTitle.textContent === '天气'){
     showWeatherPopup();
   }
 }
 
 function loadWeather(){
-  // 1) 先看缓存
   var cached = readWeatherCache();
   if (cached){
     applyWeatherData(cached);
     return;
   }
-  // 2) 没缓存 / 过期 → 请求
   var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + WEATHER_LAT + '&longitude=' + WEATHER_LON + '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,visibility&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_sum&timezone=auto&forecast_days=7';
   var airUrl = 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=' + WEATHER_LAT + '&longitude=' + WEATHER_LON + '&current=european_aqi&timezone=auto';
   Promise.all([
@@ -751,10 +1035,9 @@ function loadWeather(){
       daily: d.daily,
       air: (aq && aq.current) ? aq.current : null
     };
-    writeWeatherCache(bundle); // 写入缓存
+    writeWeatherCache(bundle);
     applyWeatherData(bundle);
   }).catch(function(){
-    // 请求失败 → 如果有旧缓存（哪怕过期）也先用着，避免空白
     try {
       var raw = localStorage.getItem(WEATHER_CACHE_KEY);
       if (raw){
@@ -762,7 +1045,6 @@ function loadWeather(){
         if (c && c.data){ applyWeatherData(c.data); return; }
       }
     } catch(e){}
-    // 彻底失败 → 隐藏骨架屏，显示错误
     var sk = $('weatherSkeleton');
     var real = $('weatherReal');
     if (sk) sk.style.display = 'none';
@@ -785,7 +1067,7 @@ function showWeatherPopup(){
   if (!weatherData){ openPopup('天气', '<div style="text-align:center;padding:30px;color:var(--text-sub);">加载中...</div>'); return; }
   var c = weatherData, d = weatherDaily, aq = weatherAir;
   var html = '<div style="text-align:center;padding:8px 0 24px;">' +
-    '<div style="font-size:76px;font-weight:200;letter-spacing:-3px;line-height:1;font-family:Iowan Old Style,Georgia,serif;">' + Math.round(c.temperature_2m) + '°</div>' +
+    '<div style="font-size:76px;font-weight:200;letter-spacing:-3px;line-height:1;font-family:\'SF Mono\',\'Cascadia Mono\',Consolas,Menlo,monospace;font-variant-numeric:tabular-nums;">' + Math.round(c.temperature_2m) + '°</div>' +
     '<div style="font-size:15px;color:var(--text-sub);margin-top:12px;letter-spacing:1px;">' + weatherText(c.weather_code) + ' · ' + WEATHER_CITY + '</div>' +
     '<div style="font-size:12px;color:var(--text-sub);margin-top:4px;opacity:.7;">体感 ' + Math.round(c.apparent_temperature) + '°</div></div>';
   var gridItems = [
@@ -817,7 +1099,7 @@ function showWeatherPopup(){
   if (wd){ wd.addEventListener('wheel', function(e){ if (e.deltaY !== 0){ e.preventDefault(); wd.scrollLeft += e.deltaY; } }, { passive: false }); }
 }
 
-/* 日常文案（外文衬线 + 中文楷体） */
+/* 日常文案 */
 var fallbackQuotes = [
   {text:'生活不是缺少美，而是缺少发现美的眼睛', source:'罗丹'},
   {text:'世界上只有一种真正的英雄主义，就是认清了生活的真相后依然热爱它', source:'罗曼·罗兰'},
@@ -870,7 +1152,7 @@ function showQuotesPopup(){
   else { openPopup('日常文案', ''); renderQuote(); }
 }
 
-/* 待办（带序号） */
+/* 待办 */
 var TODO_KEY = 'larryTodos';
 function loadTodos(){ try { return JSON.parse(localStorage.getItem(TODO_KEY) || '[]'); } catch(e){ return []; } }
 function saveTodos(list){ try { localStorage.setItem(TODO_KEY, JSON.stringify(list)); } catch(e){} updateTodoSummary(); }
@@ -913,171 +1195,564 @@ function renderTodos(){
   });
 }
 
-/* 测试中心 */
+/* ============ 测试中心 ============ */
+var MBTI_INFO = {
+  INTJ:{tag:'建筑师',line:'富有想象力与战略思维的思想家，一切皆在计划之中',body:'你倾向于用内在的逻辑体系去理解世界，善于看到事物的深层结构，并且习惯为长期目标提前布局。对无意义的社交与低效的沟通耐心有限。'},
+  INTP:{tag:'逻辑学家',line:'充满创造力的思想者，对知识有着止不住的渴望',body:'你享受在概念与可能性之间跳跃的乐趣，喜欢拆解事物的原理。你不轻易接受现成的结论，更愿意自己推导一遍。'},
+  ENTJ:{tag:'指挥官',line:'大胆而意志坚定的领导者，总能找到或创造解决方法',body:'你天生有一种推动事情向前走的力量，目标清晰，行动果断。你不害怕承担责任，也善于整合资源与人手。'},
+  ENTP:{tag:'辩论家',line:'聪明好奇的思想者，不会放过任何智力上的挑战',body:'你思维敏捷，喜欢辩论与碰撞，从中获得能量。你点子多、反应快，在变化中反而更自在。'},
+  INFJ:{tag:'提倡者',line:'安静而神秘，同时鼓舞人心且不知疲倦的理想主义者',body:'你对他人的情绪有细腻的感知力，同时又有自己坚定的价值信念。你更愿意用行动而非言语去推动改变。'},
+  INFP:{tag:'调停者',line:'诗意、善良的利他主义者，总为正当的理由提供帮助',body:'你内心丰富，对世界抱有一种理想主义的期待。你重视真实与意义，宁可慢一点，也不愿违心。'},
+  ENFJ:{tag:'主人公',line:'富有魅力、鼓舞人心的领导者，有使听众着迷的能力',body:'你天然地关注他人的成长与感受，善于激励周围的人。你在关系中获得能量，也乐于为他人付出。'},
+  ENFP:{tag:'竞选者',line:'热情、有创造力、爱社交的自由人，总能找到理由微笑',body:'你对世界永远保持着新鲜感，善于看到事物的可能性，也善于把这种热情传递给身边的人。'},
+  ISTJ:{tag:'物流师',line:'实际且注重事实的人，可靠性不容怀疑',body:'你做事有条理、讲原则，答应的事情就一定会做到。你更相信经验与事实，而不是一时的灵感。'},
+  ISFJ:{tag:'守卫者',line:'非常专注而温暖的守护者，时刻准备保护爱着的人们',body:'你细心、体贴，善于把关心落到具体的行动上。你对身边的人有一种天然的责任感。'},
+  ESTJ:{tag:'总经理',line:'出色的管理者，在管理事情或人的方面无与伦比',body:'你组织能力强，喜欢把事情安排得井井有条。你相信规则与秩序，也愿意为集体承担责任。'},
+  ESFJ:{tag:'执政官',line:'极有同情心、爱交往、受欢迎，总是热心提供帮助',body:'你重视人与人之间的连接，善于照顾到每个人的感受。你在群体中往往是那个把大家拢在一起的人。'},
+  ISTP:{tag:'鉴赏家',line:'大胆而实际的实验家，擅长使用各种形式的工具',body:'你动手能力强，喜欢在实践中解决问题。你话不多，但关键时刻往往最靠谱。'},
+  ISFP:{tag:'探险家',line:'灵活而有魅力的艺术家，时刻准备探索和体验新鲜事物',body:'你对美和感受有天然的敏感，活在当下，不喜欢被定义。你温和的外表下有一颗自由的心。'},
+  ESTP:{tag:'企业家',line:'聪明、精力充沛、善于感知的人，真心享受活在边缘',body:'你反应快、爱冒险，喜欢直接面对真实的世界。你不太喜欢纸上谈兵，更相信亲身去试。'},
+  ESFP:{tag:'表演者',line:'自发、精力充沛而热情的表演者，身边的氛围永不无聊',body:'你善于感染身边的人，享受当下的每一刻。你是那个让气氛变好的人。'}
+};
+var DIM_ADV = {
+  E:'善于从人群与互动中汲取能量，表达自然、快速破冰',
+  I:'习惯向内思考，能长时间专注在独立的任务上',
+  S:'重视事实与细节，是靠谱的执行者',
+  N:'善于捕捉抽象概念与未来可能性，看得比别人远一步',
+  T:'决策以逻辑与客观标准为准绳，不容易被人情左右',
+  F:'能敏锐感知他人的情绪与需要，是天生的倾听者',
+  J:'喜欢计划与掌控，推进事情有节奏、有闭环',
+  P:'灵活开放，拥抱变化，临场发挥能力强'
+};
+var DIM_BLIND = {
+  E:'独处沉淀的时间容易不足，偶尔需要给自己按下暂停',
+  I:'在需要主动社交的场合容易消耗较多，事后需要恢复期',
+  S:'对新奇抽象的构想有时缺乏耐心',
+  N:'落地细节容易被忽略，需要提醒自己回到具体',
+  T:'表达直接时可能显得不够体贴',
+  F:'在需要冷静拒绝时容易犹豫，容易被情绪牵动',
+  J:'对突发变动有时不够灵活，容易因此感到烦躁',
+  P:'对长期目标的推进容易缺少闭环，需要外力推动'
+};
+
 var tests = {
-  mbti: { name: 'MBTI 人格底色', desc: '20 题 · 判断你的人格类型', questions: [
-      {t:'做决策时，你更倾向于？', o:['基于逻辑和客观分析 (T)','基于共情和人际关系 (F)']},
-      {t:'周末你更喜欢？', o:['和一大群朋友聚会 (E)','一个人安静待着 (I)']},
-      {t:'与人聊天时，你更喜欢讨论？', o:['具体细节和现实经历 (S)','抽象概念和哲学思考 (N)']},
-      {t:'面对改变，你的态度是？', o:['按部就班，喜欢规划 (J)','随机应变，顺其自然 (P)']},
-      {t:'遇到争议，你通常？', o:['坚持自己认为对的观点 (T)','试图安抚双方情绪 (F)']},
-      {t:'你通过什么方式获取能量？', o:['与人交往互动 (E)','独处冥想反省 (I)']},
-      {t:'你更擅长记忆？', o:['具体数据和事实 (S)','整体感觉和印象 (N)']},
-      {t:'去旅行前你会？', o:['制定详细的行程计划 (J)','到了地方再随缘探索 (P)']},
-      {t:'朋友难过时，你第一反应是？', o:['帮ta想办法解决问题 (T)','给ta一个拥抱倾听 (F)']},
-      {t:'在工作中，你更喜欢？', o:['团队协作配合 (E)','独立完成任务 (I)']},
-      {t:'学习新技能时，你倾向于？', o:['按教程一步步走 (S)','先理解背后的原理 (N)']},
-      {t:'你的工作空间通常是？', o:['整整齐齐按分类放好 (J)','虽然乱但自己找得到 (P)']},
-      {t:'批评别人时，你通常？', o:['直戳痛点，非常犀利 (T)','注意方式，委婉温柔 (F)']},
-      {t:'社交对你来说是？', o:['充电和快乐来源 (E)','需要消耗能量的任务 (I)']},
-      {t:'你更看重事物的？', o:['实用价值 (S)','象征意义 (N)']},
-      {t:'做计划这件事让你感到？', o:['安心且有掌控感 (J)','烦躁且有束缚感 (P)']},
-      {t:'面对两难选择，你最后靠？', o:['权衡利弊的计算 (T)','内心的直觉 (F)']},
-      {t:'在人群中，你通常会？', o:['成为大家的焦点 (E)','做个安静的旁观者 (I)']},
-      {t:'你更喜欢读？', o:['纪实类报道 (S)','科幻和哲学小说 (N)']},
-      {t:'别人对你的评价通常是？', o:['严谨、靠谱 (J)','随性、自由 (P)']}
-    ],
-    finalize: function(ans){
-      var e=0,i=0,s=0,n=0,t=0,f=0,j=0,p=0;
-      ans.forEach(function(a){ var x=a||''; if(x.indexOf('(E)')>=0)e++; if(x.indexOf('(I)')>=0)i++; if(x.indexOf('(S)')>=0)s++; if(x.indexOf('(N)')>=0)n++; if(x.indexOf('(T)')>=0)t++; if(x.indexOf('(F)')>=0)f++; if(x.indexOf('(J)')>=0)j++; if(x.indexOf('(P)')>=0)p++; });
-      var r1=e>=i?'E':'I', r2=s>=n?'S':'N', r3=t>=f?'T':'F', r4=j>=p?'J':'P';
-      var type = r1+r2+r3+r4;
-      var map = {INTJ:'建筑师',INTP:'逻辑学家',ENTJ:'指挥官',ENTP:'辩论家',INFJ:'提倡者',INFP:'调停者',ENFJ:'主人公',ENFP:'竞选者',ISTJ:'物流师',ISFJ:'守卫者',ESTJ:'总经理',ESFJ:'执政官',ISTP:'鉴赏家',ISFP:'探险家',ESTP:'企业家',ESFP:'表演者'};
-      return {title: type + ' · ' + (map[type]||'探索者'), desc:'你倾向于用独立思考与内在逻辑去理解世界，注重真实与深度。'};
-    }
+  mbti: {
+    name: 'MBTI 人格底色',
+    desc: '24 题 · 四维度人格画像 · 约 5 分钟',
+    type: 'mbti',
+    questions: [
+      { t:'一场聚会结束后，你通常的感觉是？', o:['很兴奋，还想再聊一会儿','有点累，想安静待一会儿'], scores:[{E:1},{I:1}] },
+      { t:'面对一个不太熟的场合，你的第一反应是？', o:['主动找个人搭话','先观察一下环境再决定'], scores:[{E:1},{I:1}] },
+      { t:'思考问题时，你更习惯？', o:['边说边想，在交流中理清思路','先在脑子里过一遍再开口'], scores:[{E:1},{I:1}] },
+      { t:'一周里，你更期待的是？', o:['和朋友们约着出去','给自己留一段独处的时间'], scores:[{E:1},{I:1}] },
+      { t:'进入一个新团队，你通常？', o:['很快就能和大家熟络起来','需要一点时间慢慢融入'], scores:[{E:1},{I:1}] },
+      { t:'当你需要恢复精力时，你会？', o:['找人聊聊天，出去走走','一个人待着，谁也不见'], scores:[{E:1},{I:1}] },
+      { t:'读一本书或看一部电影，你更关注？', o:['具体的情节、画面与细节','背后的隐喻、主题与可能性'], scores:[{S:1},{N:1}] },
+      { t:'接触一个新概念，你更倾向于？', o:['先看它能怎么用、有什么例子','先想它的本质和延伸'], scores:[{S:1},{N:1}] },
+      { t:'你的记忆更偏向于？', o:['具体的人、事、时间、细节','整体的氛围、感觉、印象'], scores:[{S:1},{N:1}] },
+      { t:'别人说你"想太多"的时候，通常是因为？', o:['其实你不太常被这么说','你总在假设各种可能性'], scores:[{S:1},{N:1}] },
+      { t:'你更信任的是？', o:['亲身体验与直接观察','直觉与内在的判断'], scores:[{S:1},{N:1}] },
+      { t:'讨论一个问题时，你更愿意？', o:['把它落到具体细节上','把它拉向更大的格局'], scores:[{S:1},{N:1}] },
+      { t:'朋友向你倾诉时，你的第一反应是？', o:['帮他分析问题，找到解法','先接住他的情绪'], scores:[{T:1},{F:1}] },
+      { t:'做决定的时候，你更看重？', o:['事情本身的合理性','对人的影响与感受'], scores:[{T:1},{F:1}] },
+      { t:'当别人和你意见不合，你更在意？', o:['谁的道理站得住','关系会不会因此变僵'], scores:[{T:1},{F:1}] },
+      { t:'给别人提意见，你通常？', o:['直接指出问题，希望有用','注意措辞，不想伤人'], scores:[{T:1},{F:1}] },
+      { t:'别人评价你，最可能提到的是？', o:['理性、冷静、有原则','体贴、温暖、有耐心'], scores:[{T:1},{F:1}] },
+      { t:'当你自己被误解时，你更希望？', o:['对方能理解事情的真相','对方能理解你的感受'], scores:[{T:1},{F:1}] },
+      { t:'面对一次旅行，你会？', o:['提前规划好行程与住处','到了再随缘决定'], scores:[{J:1},{P:1}] },
+      { t:'你的工作台 / 书桌通常是？', o:['整齐有序，东西都有位置','看起来乱，但自己找得到'], scores:[{J:1},{P:1}] },
+      { t:'一项任务交给你，你更倾向于？', o:['尽早开始，按计划推进','灵感来了再集中做'], scores:[{J:1},{P:1}] },
+      { t:'当计划被打乱，你的感觉是？', o:['有点烦躁，想尽快恢复秩序','无所谓，变化也挺好'], scores:[{J:1},{P:1}] },
+      { t:'你更喜欢的生活方式是？', o:['有节奏、可预期、能掌控','有弹性、有惊喜、有空间'], scores:[{J:1},{P:1}] },
+      { t:'做选择时，你更舒服的是？', o:['尽快定下来，不再纠结','先留着，说不定还有更好的'], scores:[{J:1},{P:1}] }
+    ]
   },
-  mood: { name: '状态晴雨表', desc: '20 题 · 评估当前心理状态', questions: [
-      {t:'最近一周你的睡眠质量如何？', o:['非常好','还可以','经常失眠','嗜睡昏沉']},
-      {t:'面对日常压力，你感觉？', o:['游刃有余','能正常应对','有些焦虑','紧绷到极限']},
-      {t:'近期的社交频率是？', o:['经常见面','偶尔联络','只在线上','几乎封闭']},
-      {t:'你对自己当下的能量评价？', o:['充满电','平静如水','有点疲惫','急需休息']},
-      {t:'遇到突发状况，你的反应？', o:['迅速冷静应对','需要缓冲时间','容易紧张','容易慌乱']},
-      {t:'独处时你的内心感受是？', o:['很享受','感到孤独','会胡思乱想','想找点事做']},
-      {t:'面对陌生挑战，你通常会？', o:['充满期待','先观望一下','有些抗拒','容易退缩']},
-      {t:'最近感到小确幸的频率？', o:['经常有','偶尔出现','很少','几乎没体会过']},
-      {t:'你对未来的看法是？', o:['充满期待','顺其自然','有些焦虑','感到担忧']},
-      {t:'近期你的情绪状态是？', o:['非常稳定','偶尔有小波动','经常烦躁','起伏很大']},
-      {t:'当心情低落时，你会？', o:['自我调节','找人倾诉','发呆放空','转移注意力']},
-      {t:'面对选择困难，你通常？', o:['凭直觉快速决定','纠结很久','求助于别人','先放着不管']},
-      {t:'你更喜欢身处的环境是？', o:['热闹开放','安静私密','自然户外','艺术氛围']},
-      {t:'最让你放松的方式是？', o:['深度睡眠','沉浸爱好','短途旅行','躺着什么都不做']},
-      {t:'你的思维模式偏向？', o:['发散联想','逻辑推演','宏观抽象','微观细节']},
-      {t:'你觉得自己当下的节奏？', o:['高效充实','平稳正常','焦虑过快','停滞不前']},
-      {t:'如果给你一天完全自由，你会？', o:['外出探索','在家休整','叫朋友聚会','独自思考人生']},
-      {t:'你当下最需要什么？', o:['好好放松','明确目标','情感支持','物质保障']},
-      {t:'最近你对自己身体的感知？', o:['充满活力','正常','偶尔有不适','很疲惫']},
-      {t:'请给现在的自己打个分：', o:['9-10 分','7-8 分','5-6 分','3-4 分']}
-    ],
-    finalize: function(){
-      var tags = ['空明之境','渊默之思','笃定之锚','澄澈之泉'];
-      return {title: '【' + tags[Math.floor(Math.random()*tags.length)] + '】', desc:'你愿意诚实地面对当下的状态，这是自我关照的起点。请给自己一些温柔的空间。'};
-    }
+
+  mood: {
+    name: '状态晴雨表',
+    desc: '20 题 · 六大维度心理扫描 · 约 4 分钟',
+    type: 'mood',
+    questions: [
+      { cat:'sleep', t:'最近一周，你的睡眠质量如何？', o:['非常好，醒来精力充沛','还可以，基本能休息好','经常失眠或浅眠','嗜睡、昏沉，睡不够'], scores:[3,2,1,0] },
+      { cat:'sleep', t:'你对自己当下的能量评价？', o:['充满电','平静如水','有点疲惫','急需休息'], scores:[3,2,1,0] },
+      { cat:'sleep', t:'最近你对自己身体的感知？', o:['充满活力','正常','偶尔有不适','很疲惫'], scores:[3,2,1,0] },
+      { cat:'mood',  t:'近期你的情绪状态是？', o:['非常稳定','偶尔有小波动','经常烦躁','起伏很大'], scores:[3,2,1,0] },
+      { cat:'mood',  t:'独处时你的内心感受是？', o:['很享受','感到孤独','会胡思乱想','想找点事做'], scores:[3,2,1,1] },
+      { cat:'mood',  t:'当心情低落时，你会？', o:['自我调节','找人倾诉','发呆放空','转移注意力'], scores:[3,2,1,2] },
+      { cat:'social',t:'近期的社交频率是？', o:['经常见面','偶尔联络','只在线上','几乎封闭'], scores:[3,2,1,0] },
+      { cat:'social',t:'你更喜欢身处的环境是？', o:['热闹开放','安静私密','自然户外','艺术氛围'], scores:[3,2,3,3] },
+      { cat:'social',t:'如果给你一天完全自由，你会？', o:['外出探索','在家休整','叫朋友聚会','独自思考人生'], scores:[3,2,3,2] },
+      { cat:'stress',t:'面对日常压力，你感觉？', o:['游刃有余','能正常应对','有些焦虑','紧绷到极限'], scores:[3,2,1,0] },
+      { cat:'stress',t:'遇到突发状况，你的反应？', o:['迅速冷静应对','需要缓冲时间','容易紧张','容易慌乱'], scores:[3,2,1,0] },
+      { cat:'stress',t:'面对选择困难，你通常？', o:['凭直觉快速决定','纠结很久','求助于别人','先放着不管'], scores:[3,1,2,0] },
+      { cat:'goal',  t:'你对未来的看法是？', o:['充满期待','顺其自然','有些焦虑','感到担忧'], scores:[3,2,1,0] },
+      { cat:'goal',  t:'你觉得自己当下的节奏？', o:['高效充实','平稳正常','焦虑过快','停滞不前'], scores:[3,2,1,0] },
+      { cat:'goal',  t:'你当下最需要什么？', o:['好好放松','明确目标','情感支持','物质保障'], scores:[2,3,2,1] },
+      { cat:'body',  t:'最近感到小确幸的频率？', o:['经常有','偶尔出现','很少','几乎没体会过'], scores:[3,2,1,0] },
+      { cat:'body',  t:'最让你放松的方式是？', o:['深度睡眠','沉浸爱好','短途旅行','躺着什么都不做'], scores:[3,3,2,1] },
+      { cat:'body',  t:'你的思维模式偏向？', o:['发散联想','逻辑推演','宏观抽象','微观细节'], scores:[2,3,2,2] },
+      { cat:'body',  t:'面对陌生挑战，你通常会？', o:['充满期待','先观望一下','有些抗拒','容易退缩'], scores:[3,2,1,0] },
+      { cat:'body',  t:'请给现在的自己打个分：', o:['9-10 分','7-8 分','5-6 分','3-4 分'], scores:[4,3,2,1] }
+    ]
   },
-  iq: { name: 'IQ 思维测试', desc: '20 题 · 认知推理综合评估', questions: [
-      {t:'2, 4, 8, 16, ?', o:['24','32','30','28']},
-      {t:'1, 1, 2, 3, 5, 8, ?', o:['12','13','11','14']},
-      {t:'一个正方体有多少条棱？', o:['8','10','12','14']},
-      {t:'若 5 个工人 5 分钟做 5 个零件，100 个工人 100 分钟做多少个？', o:['100','500','1000','2000']},
-      {t:'1, 4, 9, 16, ?', o:['20','25','24','30']},
-      {t:'甲乙丙赛跑，甲不是第一，乙不是第一，谁第一？', o:['甲','乙','丙','无法确定']},
-      {t:'一个数的平方是 144，这个数是？', o:['12','14','16','18']},
-      {t:'3, 6, 11, 18, ?', o:['25','27','29','30']},
-      {t:'时钟 3 点整，时针与分针夹角多少度？', o:['60','90','120','150']},
-      {t:'A 比 B 高，B 比 C 高，那么 A 比 C？', o:['高','矮','一样','无法确定']},
-      {t:'2, 3, 5, 8, 13, ?', o:['18','19','20','21']},
-      {t:'一打鸡蛋多少个？', o:['10','12','15','16']},
-      {t:'甲=3乙，乙=2丙，甲是丙的几倍？', o:['3','5','6','8']},
-      {t:'1, 8, 27, 64, ?', o:['100','121','125','144']},
-      {t:'所有玫瑰都是花，有些花会凋谢，那么？', o:['有些玫瑰会凋谢','所有玫瑰都会凋谢','有些玫瑰不会凋谢','无法确定']},
-      {t:'7 个连续整数和为 105，最小的是？', o:['11','12','13','14']},
-      {t:'圆形花坛周长 12.56 米，直径约？', o:['3 米','4 米','5 米','6 米']},
-      {t:'向东 3 米再向北 4 米，离家多远？', o:['5 米','6 米','7 米','12 米']},
-      {t:'9 的平方根是？', o:['3','-3','±3','81']},
-      {t:'100 元买 3 元一瓶的水，最多买几瓶？', o:['30','33','34','35']}
-    ],
-    finalize: function(ans){
-      var correct = ['32','13','12','100','25','丙','12','27','90','高','21','12','6','125','有些玫瑰会凋谢','12','4 米','5 米','±3','33'];
-      var score = 0; ans.forEach(function(a, i){ if (a === correct[i]) score++; });
-      var level = score >= 16 ? '思维敏捷，推理出色' : score >= 11 ? '认知稳健，逻辑清晰' : '思维直觉型，感受力强';
-      return {title: '得分 ' + score + ' / 20', desc: level + '。这份测试仅作娱乐，智力是多维度的，从来无法被单一分数定义。'};
-    }
+
+  iq: {
+    name: 'IQ 思维测试',
+    desc: '20 题 · 五类题型综合评估 · 约 6 分钟',
+    type: 'iq',
+    questions: [
+      { cat:'数列', t:'2, 4, 8, 16, ?', o:['24','32','30','28'], ans:1 },
+      { cat:'数列', t:'1, 1, 2, 3, 5, 8, ?', o:['12','13','11','14'], ans:1 },
+      { cat:'空间', t:'一个正方体有多少条棱？', o:['8','10','12','14'], ans:2 },
+      { cat:'数学', t:'5 个工人 5 分钟做 5 个零件，100 个工人 100 分钟做多少个？', o:['100','500','1000','2000'], ans:0 },
+      { cat:'数列', t:'1, 4, 9, 16, ?', o:['20','25','24','30'], ans:1 },
+      { cat:'逻辑', t:'甲乙丙赛跑。甲不是第一，乙不是第一，谁第一？', o:['甲','乙','丙','无法确定'], ans:2 },
+      { cat:'数学', t:'一个数的平方是 144，这个数是？', o:['12','14','16','18'], ans:0 },
+      { cat:'数列', t:'3, 6, 11, 18, ?', o:['25','27','29','30'], ans:1 },
+      { cat:'空间', t:'时钟 3 点整，时针与分针的夹角是多少度？', o:['60','90','120','150'], ans:1 },
+      { cat:'逻辑', t:'A 比 B 高，B 比 C 高，那么 A 比 C？', o:['高','矮','一样','无法确定'], ans:0 },
+      { cat:'数列', t:'2, 3, 5, 8, 13, ?', o:['18','19','20','21'], ans:3 },
+      { cat:'常识', t:'一打鸡蛋有多少个？', o:['10','12','15','16'], ans:1 },
+      { cat:'数学', t:'甲 = 3乙，乙 = 2丙，甲是丙的几倍？', o:['3','5','6','8'], ans:2 },
+      { cat:'数列', t:'1, 8, 27, 64, ?', o:['100','121','125','144'], ans:2 },
+      { cat:'逻辑', t:'所有玫瑰都是花，有些花会凋谢。那么？', o:['有些玫瑰会凋谢','所有玫瑰都会凋谢','有些玫瑰不会凋谢','无法确定'], ans:3 },
+      { cat:'数学', t:'7 个连续整数的和是 105，最小的是？', o:['11','12','13','14'], ans:1 },
+      { cat:'空间', t:'圆形花坛周长 12.56 米，直径约为？', o:['3 米','4 米','5 米','6 米'], ans:1 },
+      { cat:'常识', t:'向东走 3 米，再向北走 4 米，离家多远？', o:['5 米','6 米','7 米','12 米'], ans:0 },
+      { cat:'数学', t:'9 的平方根是？', o:['3','-3','±3','81'], ans:2 },
+      { cat:'数学', t:'100 元买 3 元一瓶的水，最多买几瓶？', o:['30','33','34','35'], ans:1 }
+    ]
   },
-  friend: { name: '朋友眼中的你', desc: '15 题 · 朋友视角的你', questions: [
-      {t:'第一印象给人？', o:['清冷','温和','疏离','成熟','神秘']},
-      {t:'性格底色偏向？', o:['理智','随性','热烈','平和']},
-      {t:'熟了之后觉得？', o:['话痨','默契','依赖','客气']},
-      {t:'最想吐槽的点？', o:['太会照顾人','彬彬有礼','已读不回','表面平静']},
-      {t:'交朋友的核心原则？', o:['宁缺毋滥','随缘','看重真诚','包容']},
-      {t:'周末约饭选哪？', o:['安静角落','市井街头','咖啡馆','随便']},
-      {t:'我俩性格相似吗？', o:['很像','互补','不同但舒服','太像较劲']},
-      {t:'初见哪个细节最深刻？', o:['穿着打扮','说话语气','小动作','对话氛围']},
-      {t:'别人问起你，我会怎么评价？', o:['人际广泛','值得倾诉','温和善良','独特']},
-      {t:'最固执的地方是？', o:['底线原则','日常节奏','自信','消费观']},
-      {t:'如果有压力你通常？', o:['默默消化','找人倾诉','转移注意','躺平']},
-      {t:'最特别的地方是？', o:['看事透彻','私底下有意思','小众爱好','执着']},
-      {t:'社交圈里的角色？', o:['开心果','树洞','定海神针','摸鱼']},
-      {t:'最大的反差点在哪里？', o:['社恐话痨','随和有主见','摆烂努力','温柔且狠']},
-      {t:'未来的相处模式？', o:['常常联系','偶尔问候','各自安好','一直同行']}
-    ],
-    finalize: function(){ return {title: '朋友视角的你', desc:'在朋友眼中，你是一个有层次、有温度、有些小固执但足够真诚的人。这份测试更像一面镜子，感谢你愿意被看见。'}; }
+
+  friend: {
+    name: '朋友眼中的你',
+    desc: '15 题 · 七维气质画像 · 约 3 分钟',
+    type: 'friend',
+    questions: [
+      { t:'第一印象给人？', o:['清冷','温和','疏离','成熟','神秘'], tags:['cool','warm','cool','mature','mystery'] },
+      { t:'性格底色偏向？', o:['理智','随性','热烈','平和'], tags:['rational','free','warm','calm'] },
+      { t:'熟了之后觉得？', o:['话痨','默契','依赖','客气'], tags:['warm','calm','warm','cool'] },
+      { t:'最想吐槽的点？', o:['太会照顾人','彬彬有礼','已读不回','表面平静'], tags:['warm','mature','cool','mystery'] },
+      { t:'交朋友的核心原则？', o:['宁缺毋滥','随缘','看重真诚','包容'], tags:['rational','free','warm','calm'] },
+      { t:'周末约饭选哪？', o:['安静角落','市井街头','咖啡馆','随便'], tags:['calm','free','mature','free'] },
+      { t:'我俩性格相似吗？', o:['很像','互补','不同但舒服','太像较劲'], tags:['calm','warm','mature','rational'] },
+      { t:'初见哪个细节最深刻？', o:['穿着打扮','说话语气','小动作','对话氛围'], tags:['mature','warm','mystery','calm'] },
+      { t:'别人问起你，我会怎么评价？', o:['人际广泛','值得倾诉','温和善良','独特'], tags:['warm','warm','calm','mystery'] },
+      { t:'最固执的地方是？', o:['底线原则','日常节奏','自信','消费观'], tags:['rational','calm','mature','rational'] },
+      { t:'如果有压力你通常？', o:['默默消化','找人倾诉','转移注意','躺平'], tags:['cool','warm','free','free'] },
+      { t:'最特别的地方是？', o:['看事透彻','私底下有意思','小众爱好','执着'], tags:['rational','mystery','mystery','rational'] },
+      { t:'社交圈里的角色？', o:['开心果','树洞','定海神针','摸鱼'], tags:['warm','warm','calm','free'] },
+      { t:'最大的反差点在哪里？', o:['社恐话痨','随和有主见','摆烂努力','温柔且狠'], tags:['mystery','mature','rational','mature'] },
+      { t:'未来的相处模式？', o:['常常联系','偶尔问候','各自安好','一直同行'], tags:['warm','calm','free','warm'] }
+    ]
   }
 };
+
+var FRIEND_TRAITS = {
+  warm:    {name:'暖',  desc:'你是朋友眼中那个有温度的人，愿意靠近，值得倾诉。'},
+  cool:    {name:'清',  desc:'你身上有一种不刻意亲近的松弛感，反而让人好奇。'},
+  calm:    {name:'稳',  desc:'你是那个"在场就安心"的存在，不喧哗，却很可靠。'},
+  mystery: {name:'隐',  desc:'你有层次，不轻易被人看透，这本身就是一种魅力。'},
+  mature:  {name:'熟',  desc:'你身上有一种超出年龄的稳，让人觉得可以依赖。'},
+  rational:{name:'明',  desc:'你看事情清楚、讲道理，朋友遇到难题会想起你。'},
+  free:    {name:'逸',  desc:'你不被定义、不被束缚，在朋友眼里，你是"自由"的化身。'}
+};
+
+var MOOD_DIM = {
+  sleep: {name:'睡眠与精力', advice:'尽量固定入睡时间，睡前 1 小时远离屏幕'},
+  mood:  {name:'情绪状态',   advice:'每天留 10 分钟写下"今天的一件小事"，给情绪一个出口'},
+  social:{name:'社交连接',   advice:'主动发起一次小小的邀约，哪怕只是短暂的一杯咖啡'},
+  stress:{name:'压力应对',   advice:'把大任务拆成可完成的小步骤，从最简单的开始'},
+  goal:  {name:'目标与节奏', advice:'写下一个 30 天内可验证的小目标，别贪多'},
+  body:  {name:'身心细微',   advice:'每天 20 分钟散步，让身体带着情绪往前走'}
+};
+
 var currentTest = null, currentTestIdx = 0, currentTestAns = [];
 
 function showTestsMenu(){
   var html = '<div class="test-menu">';
-  Object.keys(tests).forEach(function(k){ var t = tests[k]; html += '<div class="test-menu-item" data-test="' + k + '"><div><div class="name">' + t.name + '</div><div class="desc">' + t.desc + '</div></div><div class="arrow">›</div></div>'; });
+  Object.keys(tests).forEach(function(k){
+    var t = tests[k];
+    html += '<div class="test-menu-item" data-test="' + k + '">' +
+      '<div><div class="name">' + t.name + '</div><div class="desc">' + t.desc + '</div></div>' +
+      '<div class="arrow">›</div></div>';
+  });
   html += '</div>';
   openPopup('测试中心', html);
-  popupContent.querySelectorAll('[data-test]').forEach(function(el){ el.addEventListener('click', function(){ currentTest = tests[el.getAttribute('data-test')]; currentTestIdx = 0; currentTestAns = []; renderTestQuestion(); }); });
+  popupContent.querySelectorAll('[data-test]').forEach(function(el){
+    el.addEventListener('click', function(){
+      currentTest = tests[el.getAttribute('data-test')];
+      currentTestIdx = 0;
+      currentTestAns = [];
+      renderTestQuestion();
+    });
+  });
 }
+
 function renderTestQuestion(){
   if (!currentTest) return;
-  var q = currentTest.questions[currentTestIdx], total = currentTest.questions.length, progress = (currentTestIdx / total) * 100;
+  var q = currentTest.questions[currentTestIdx];
+  var total = currentTest.questions.length;
+  var progress = (currentTestIdx / total) * 100;
   var html = '<div class="test-progress"><div class="test-progress-fill" style="width:' + progress + '%"></div></div>';
   html += '<div class="test-q-title">' + (currentTestIdx+1) + '/' + total + ' · ' + escapeHtml(q.t) + '</div><div>';
-  q.o.forEach(function(opt){ var sel = currentTestAns[currentTestIdx] === opt ? ' selected' : ''; html += '<div class="test-opt' + sel + '" data-opt="' + escapeAttr(opt) + '">' + escapeHtml(opt) + '</div>'; });
+  q.o.forEach(function(opt, idx){
+    var sel = currentTestAns[currentTestIdx] === idx ? ' selected' : '';
+    html += '<div class="test-opt' + sel + '" data-idx="' + idx + '">' +
+      '<span class="opt-mark"></span><span>' + escapeHtml(opt) + '</span></div>';
+  });
   html += '</div><div class="test-nav">';
   if (currentTestIdx > 0) html += '<button class="btn-secondary" id="testPrev">上一题</button>';
-  if (currentTestAns[currentTestIdx]){
+  if (currentTestAns[currentTestIdx] != null){
     if (currentTestIdx < total - 1) html += '<button class="btn-primary" id="testNext" style="flex:1;">下一题</button>';
     else html += '<button class="btn-primary" id="testFinish" style="flex:1;">查看结果</button>';
   }
   html += '<span class="test-step">' + (currentTestIdx+1) + ' / ' + total + '</span></div>';
   popupContent.innerHTML = html;
-  popupContent.querySelectorAll('[data-opt]').forEach(function(el){
+
+  popupContent.querySelectorAll('[data-idx]').forEach(function(el){
     el.addEventListener('click', function(){
-      currentTestAns[currentTestIdx] = el.getAttribute('data-opt');
-      if (currentTestIdx < currentTest.questions.length - 1){ setTimeout(function(){ currentTestIdx++; renderTestQuestion(); }, 350); }
-      else { renderTestQuestion(); }
+      var idx = parseInt(el.getAttribute('data-idx'), 10);
+      currentTestAns[currentTestIdx] = idx;
+      if (currentTestIdx < currentTest.questions.length - 1){
+        setTimeout(function(){ currentTestIdx++; renderTestQuestion(); }, 260);
+      } else {
+        renderTestQuestion();
+      }
     });
   });
   var prev = $('testPrev'); if (prev) prev.addEventListener('click', function(){ currentTestIdx--; renderTestQuestion(); });
   var next = $('testNext'); if (next) next.addEventListener('click', function(){ currentTestIdx++; renderTestQuestion(); });
-  var fin = $('testFinish'); if (fin) fin.addEventListener('click', function(){ finishTest(); });
+  var fin = $('testFinish'); if (fin) fin.addEventListener('click', finishTest);
 }
+
+/* ============ 报告生成 ============ */
+function barHTML(leftLabel, rightLabel, leftPct){
+  var l = Math.round(leftPct), r = 100 - l;
+  return '<div class="report-bar-item">' +
+    '<div class="report-bar-label">' +
+      '<span class="' + (l >= r ? 'on' : '') + '">' + leftLabel + '</span>' +
+      '<span class="' + (r > l ? 'on' : '') + '">' + rightLabel + '</span>' +
+    '</div>' +
+    '<div class="report-bar-track"><div class="report-bar-left" style="width:' + l + '%"></div></div>' +
+    '<div class="report-bar-num"><span>' + l + '%</span><span>' + r + '%</span></div>' +
+  '</div>';
+}
+function tagHTML(t){ return '<span class="report-tag">' + t + '</span>'; }
+function sectionHTML(title, body){ return '<div class="report-section"><div class="report-section-title">' + title + '</div>' + body + '</div>'; }
+function listHTML(items){ return '<ul class="report-list">' + items.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul>'; }
+
+function reportMBTI(res){
+  var c = res.cnt;
+  var info = MBTI_INFO[res.mbti] || {tag:'探索者', line:'', body:''};
+  var typeStr = res.mbti;
+  var eP = Math.round(c.E / Math.max(1, c.E + c.I) * 100);
+  var nP = Math.round(c.N / Math.max(1, c.N + c.S) * 100);
+  var fP = Math.round(c.F / Math.max(1, c.F + c.T) * 100);
+  var pP = Math.round(c.P / Math.max(1, c.P + c.J) * 100);
+
+  var html = '<div class="report-head">' +
+    '<div class="report-badge">TEST REPORT</div>' +
+    '<div class="report-main-title">' + typeStr + ' · ' + info.tag + '</div>' +
+    '<div class="report-subtitle">' + info.line + '</div>' +
+    '<div class="report-tags">' + tagHTML('内向 ' + (eP < 50 ? Math.round(100-eP) : eP) + '%').replace('内向', eP<50?'内向':'内向') + '</div>' +
+  '</div>';
+
+  html += sectionHTML('维度倾向',
+    barHTML('外向 E', '内向 I', 100 - eP) +
+    barHTML('实感 S', '直觉 N', nP) +
+    barHTML('思考 T', '情感 F', fP) +
+    barHTML('判断 J', '感知 P', pP)
+  );
+
+  html += sectionHTML('核心描述', '<p class="report-text">' + info.body + '</p>');
+
+  var adv = [
+    DIM_ADV[typeStr[0]], DIM_ADV[typeStr[1]], DIM_ADV[typeStr[2]], DIM_ADV[typeStr[3]]
+  ];
+  html += sectionHTML('你的优势', listHTML(adv));
+
+  var blind = [
+    DIM_BLIND[typeStr[0]], DIM_BLIND[typeStr[1]], DIM_BLIND[typeStr[2]], DIM_BLIND[typeStr[3]]
+  ];
+  html += sectionHTML('可能的盲点', listHTML(blind));
+
+  html += sectionHTML('关系与成长',
+    '<p class="report-text">与你相处，需要一点耐心去理解你的"内在逻辑"；一旦被信任，你就是那种可以长期并肩的人。</p>' +
+    '<p class="report-text">如果想让关系更顺，试着在表达判断之前，先说一句感受——这会让别人更容易靠近你。</p>'
+  );
+
+  html += '<div class="report-foot">LARRY WORKBENCH · MBTI</div>';
+  html += '<div class="report-disclaimer">本测试基于自我报告，仅供自我了解参考，不代表科学诊断。</div>';
+  return html;
+}
+
+function reportMood(res){
+  var dims = res.dims;
+  var overall = 0, n = 0;
+  Object.keys(dims).forEach(function(k){ overall += dims[k].pct; n++; });
+  overall = n ? Math.round(overall / n) : 0;
+
+  var level, line;
+  if (overall >= 80) { level = '状态良好'; line = '你目前的状态比较平衡，请继续保持这份节奏。'; }
+  else if (overall >= 60) { level = '总体平稳'; line = '整体不错，但某些方面需要一点关照。'; }
+  else if (overall >= 40) { level = '需要留意'; line = '有一些信号在提醒你：是时候给自己一点空间了。'; }
+  else { level = '值得关照'; line = '你辛苦了，先允许自己慢下来。'; }
+
+  var html = '<div class="report-head">' +
+    '<div class="report-badge">STATE REPORT</div>' +
+    '<div class="report-main-title">' + level + '</div>' +
+    '<div class="report-subtitle">' + line + '</div>' +
+  '</div>';
+
+  html += '<div class="report-score-big">' +
+    '<div><span class="report-score-num">' + overall + '</span><span class="report-score-total">/ 100</span></div>' +
+    '<div class="report-score-label">综 合 状 态</div>' +
+  '</div>';
+
+  var dimBars = '';
+  Object.keys(dims).forEach(function(k){
+    var d = dims[k];
+    dimBars += barHTML(d.name, '', d.pct);
+  });
+  html += sectionHTML('六维扫描', dimBars);
+
+  var lowDims = [];
+  Object.keys(dims).forEach(function(k){
+    if (dims[k].pct < 60) lowDims.push({name: MOOD_DIM[k].name, pct: dims[k].pct, advice: MOOD_DIM[k].advice});
+  });
+  lowDims.sort(function(a,b){ return a.pct - b.pct; });
+
+  if (lowDims.length){
+    html += sectionHTML('优先关照', listHTML(lowDims.map(function(d){
+      return '<b>' + d.name + '</b>（' + d.pct + '%）—— ' + d.advice;
+    })));
+  } else {
+    html += sectionHTML('继续保持',
+      '<p class="report-text">六个维度都在健康区间。请记住这种节奏，也别忘了给未来的自己预留弹性。</p>'
+    );
+  }
+
+  html += '<div class="report-foot">LARRY WORKBENCH · MOOD</div>';
+  html += '<div class="report-disclaimer">这是一份自我感知记录，不是心理诊断。如果你长时间感到低落或焦虑，建议找专业人士聊聊。</div>';
+  return html;
+}
+
+function reportIQ(res){
+  var score = res.score, total = res.total;
+  var level = score >= 17 ? '卓越' : score >= 14 ? '优秀' : score >= 11 ? '良好' : score >= 8 ? '中等' : '基础';
+  var line = score >= 17 ? '思维敏捷，逻辑与推理能力出色。' :
+             score >= 14 ? '认知稳健，抽象与逻辑表现都很好。' :
+             score >= 11 ? '整体认知均衡，逻辑清晰。' :
+             score >= 8  ? '基础稳固，某些类型可以针对性提升。' :
+                           '这份测试更像是认知风格的一个切面，分数不代表你的全部。';
+
+  var html = '<div class="report-head">' +
+    '<div class="report-badge">COGNITIVE REPORT</div>' +
+    '<div class="report-main-title">' + level + '</div>' +
+    '<div class="report-subtitle">' + line + '</div>' +
+  '</div>';
+
+  html += '<div class="report-score-big">' +
+    '<div><span class="report-score-num">' + score + '</span><span class="report-score-total">/ ' + total + '</span></div>' +
+    '<div class="report-score-label">正 确 率 ' + Math.round(score/total*100) + '%</div>' +
+  '</div>';
+
+  var catStats = res.catStats;
+  var grid = '<div class="report-grid">';
+  Object.keys(catStats).forEach(function(cat){
+    var s = catStats[cat];
+    var pct = Math.round(s.correct / s.total * 100);
+    grid += '<div class="report-grid-item">' +
+      '<div class="lbl">' + cat + '推理</div>' +
+      '<div class="val">' + s.correct + '/' + s.total + '</div>' +
+      '<div class="sub">正确率 ' + pct + '%</div>' +
+    '</div>';
+  });
+  grid += '</div>';
+  html += sectionHTML('分项表现', grid);
+
+  var best = null, worst = null;
+  Object.keys(catStats).forEach(function(cat){
+    var s = catStats[cat];
+    var pct = s.correct / s.total * 100;
+    if (!best || pct > best.pct) best = {cat: cat, pct: pct};
+    if (!worst || pct < worst.pct) worst = {cat: cat, pct: pct};
+  });
+
+  if (best && worst && best.cat !== worst.cat){
+    html += sectionHTML('强项与可提升空间',
+      listHTML([
+        '<b>' + best.cat + '</b> 是你表现最好的一类（' + Math.round(best.pct) + '%）——' + catComment(best.cat, true),
+        '<b>' + worst.cat + '</b> 相对弱一些（' + Math.round(worst.pct) + '%）——' + catComment(worst.cat, false)
+      ])
+    );
+  }
+
+  html += '<div class="report-foot">LARRY WORKBENCH · IQ</div>';
+  html += '<div class="report-disclaimer">智力是多维的，无法用单一分数定义。本测试仅作娱乐与自我观察。</div>';
+  return html;
+}
+
+function catComment(cat, good){
+  var map = {
+    '数列': good ? '你善于捕捉数字间的规律与递推关系。' : '可以试着从差值、倍数、平方等常见规律切入。',
+    '逻辑': good ? '你处理条件推理的能力不错，能从前提中得出结论。' : '多注意"全部/有些"这类量词的差别，结论会更严谨。',
+    '空间': good ? '你对空间与图形的直觉较好。' : '平时可以多做一些折纸、拼图的思维训练。',
+    '数学': good ? '你的基础数学能力扎实。' : '慢一点、看清单位与关系，正确率会明显提升。',
+    '常识': good ? '生活常识很稳。' : '多留意日常细节，很多答案其实就在身边。'
+  };
+  return map[cat] || '';
+}
+
+function reportFriend(res){
+  var top = res.top;
+  var html = '<div class="report-head">' +
+    '<div class="report-badge">FRIEND REPORT</div>' +
+    '<div class="report-main-title">朋友眼中的你</div>' +
+    '<div class="report-subtitle">有些特质，只有离得足够近的人才看得见</div>' +
+    '<div class="report-tags">' + top.map(function(t){ return tagHTML(FRIEND_TRAITS[t].name); }).join('') + '</div>' +
+  '</div>';
+
+  var body = top.map(function(t){
+    var info = FRIEND_TRAITS[t];
+    return '<p class="report-text"><b>「' + info.name + '」</b> ' + info.desc + '</p>';
+  }).join('');
+  html += sectionHTML('你的三个侧面', body);
+
+  var lines = [];
+  if (top.indexOf('warm') >= 0) lines.push('你身边的朋友多半愿意把心事告诉你，这份信任来之不易。');
+  if (top.indexOf('cool') >= 0) lines.push('你的"不刻意"反而是一种吸引力，让人愿意慢慢走近。');
+  if (top.indexOf('rational') >= 0) lines.push('讲道理的时候你不含糊，这让朋友在做决定时愿意找你。');
+  if (top.indexOf('calm') >= 0) lines.push('你的稳定是一种稀缺资源，朋友在你身边会觉得安心。');
+  if (top.indexOf('mystery') >= 0) lines.push('你不急着让所有人认识你，这让你显得更有层次。');
+  if (top.indexOf('mature') >= 0) lines.push('你身上有一种沉稳，让朋友觉得"你懂"。');
+  if (top.indexOf('free') >= 0) lines.push('你不按常规出牌，这种自由反而让身边的人觉得轻松。');
+  html += sectionHTML('综合画像', '<p class="report-text">' + lines.join(' ') + '</p>');
+
+  html += sectionHTML('一句话送给现在的你',
+    '<p class="report-text">在别人的眼中，你或许比你以为的更好。别忘了常常回来看看自己。</p>'
+  );
+
+  html += '<div class="report-foot">LARRY WORKBENCH · FRIEND</div>';
+  html += '<div class="report-disclaimer">本测试基于"你猜朋友怎么看你"，是投射而不是真实评价，仅供娱乐。</div>';
+  return html;
+}
+
 function finishTest(){
-  var res = currentTest.finalize(currentTestAns);
   var name = currentTest.name;
-  var dateStr = new Date().toLocaleDateString('zh-CN');
-  var html = '<div class="test-report" id="testReport">' +
-    '<div class="report-badge">TEST REPORT · ' + dateStr + '</div>' +
-    '<div class="report-title">' + escapeHtml(res.title) + '</div>' +
-    '<div class="report-body">' + escapeHtml(res.desc) + '</div>' +
-    '<div class="report-foot">Larry 工作台 · ' + name + ' · v' + VERSION + '</div>' +
-  '</div>' +
-  '<div style="display:flex;gap:8px;margin-top:16px;">' +
-    '<button class="btn-secondary" id="reportCopy" style="flex:1;">复制报告</button>' +
+  var qs = currentTest.questions;
+  var ans = currentTestAns;
+  var res;
+
+  if (currentTest.type === 'mbti'){
+    var cnt = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
+    ans.forEach(function(idx, i){
+      if (idx == null) return;
+      var s = qs[i].scores[idx]; if (!s) return;
+      Object.keys(s).forEach(function(k){ cnt[k] += s[k]; });
+    });
+    var type = (cnt.E >= cnt.I ? 'E' : 'I') + (cnt.S >= cnt.N ? 'S' : 'N') + (cnt.T >= cnt.F ? 'T' : 'F') + (cnt.J >= cnt.P ? 'J' : 'P');
+    res = {mbti: type, cnt: cnt};
+  }
+  else if (currentTest.type === 'mood'){
+    var dims = {};
+    ans.forEach(function(idx, i){
+      if (idx == null) return;
+      var q = qs[i];
+      var sc = q.scores[idx] != null ? q.scores[idx] : 0;
+      if (!dims[q.cat]) dims[q.cat] = {got: 0, max: 0};
+      dims[q.cat].got += sc;
+      dims[q.cat].max += Math.max.apply(null, q.scores);
+    });
+    var pctDims = {};
+    Object.keys(dims).forEach(function(k){
+      pctDims[k] = {
+        name: MOOD_DIM[k] ? MOOD_DIM[k].name : k,
+        pct: Math.round(dims[k].got / Math.max(1, dims[k].max) * 100)
+      };
+    });
+    res = {dims: pctDims};
+  }
+  else if (currentTest.type === 'iq'){
+    var score = 0;
+    var catStats = {};
+    ans.forEach(function(idx, i){
+      var q = qs[i];
+      if (!catStats[q.cat]) catStats[q.cat] = {correct: 0, total: 0};
+      catStats[q.cat].total++;
+      if (idx === q.ans){ score++; catStats[q.cat].correct++; }
+    });
+    res = {score: score, total: qs.length, catStats: catStats};
+  }
+  else if (currentTest.type === 'friend'){
+    var count = {};
+    ans.forEach(function(idx, i){
+      if (idx == null) return;
+      var t = qs[i].tags[idx]; if (!t) return;
+      count[t] = (count[t] || 0) + 1;
+    });
+    var top = Object.keys(count).sort(function(a,b){ return count[b] - count[a]; }).slice(0, 3);
+    if (!top.length) top = ['warm','calm','rational'];
+    res = {top: top, count: count};
+  }
+
+  var reportHTML = '<div class="test-report">';
+  if (currentTest.type === 'mbti') reportHTML += reportMBTI(res);
+  else if (currentTest.type === 'mood') reportHTML += reportMood(res);
+  else if (currentTest.type === 'iq') reportHTML += reportIQ(res);
+  else if (currentTest.type === 'friend') reportHTML += reportFriend(res);
+  reportHTML += '</div>';
+  reportHTML += '<div style="display:flex;gap:8px;margin-top:18px;">' +
+    '<button class="btn-secondary" id="reportCopy" style="flex:1;">复制关键结果</button>' +
     '<button class="btn-primary" id="reportBack" style="flex:1;">返回测试中心</button>' +
-  '</div>' +
-  '<div style="font-size:11px;color:var(--text-sub);opacity:.6;text-align:center;margin-top:10px;">如需截图，手机用户可用系统截图；电脑用户可用 Win+Shift+S</div>';
-  popupContent.innerHTML = html;
+  '</div>';
+
+  popupContent.innerHTML = reportHTML;
+
   $('reportCopy').addEventListener('click', function(){
-    var txt = '【' + name + '】\n结果：' + res.title + '\n' + res.desc + '\n—— Larry 工作台 v' + VERSION;
+    var txt = '【' + name + '】\n' + reportPlainText(currentTest.type, res) + '\n—— Larry 工作台 v' + VERSION;
     copyText(txt);
   });
   $('reportBack').addEventListener('click', showTestsMenu);
 }
+
+function reportPlainText(type, res){
+  if (type === 'mbti'){
+    var c = res.cnt;
+    var i1 = Math.round(c.I / Math.max(1, c.E + c.I) * 100);
+    var n1 = Math.round(c.N / Math.max(1, c.N + c.S) * 100);
+    var f1 = Math.round(c.F / Math.max(1, c.F + c.T) * 100);
+    var p1 = Math.round(c.P / Math.max(1, c.P + c.J) * 100);
+    var info = MBTI_INFO[res.mbti];
+    return res.mbti + ' · ' + info.tag + '\n' + info.line + '\n' +
+      '内向 I ' + i1 + '% / 外向 E ' + (100-i1) + '%\n' +
+      '直觉 N ' + n1 + '% / 实感 S ' + (100-n1) + '%\n' +
+      '情感 F ' + f1 + '% / 思考 T ' + (100-f1) + '%\n' +
+      '感知 P ' + p1 + '% / 判断 J ' + (100-p1) + '%';
+  }
+  if (type === 'mood'){
+    var lines = [];
+    var overall = 0, n = 0;
+    Object.keys(res.dims).forEach(function(k){
+      lines.push(res.dims[k].name + ' ' + res.dims[k].pct + '%');
+      overall += res.dims[k].pct; n++;
+    });
+    return '综合状态 ' + Math.round(overall/Math.max(1,n)) + ' / 100\n' + lines.join('\n');
+  }
+  if (type === 'iq'){
+    var lines = ['得分 ' + res.score + ' / ' + res.total + '（' + Math.round(res.score/res.total*100) + '%）'];
+    Object.keys(res.catStats).forEach(function(cat){
+      lines.push(cat + ' ' + res.catStats[cat].correct + '/' + res.catStats[cat].total);
+    });
+    return lines.join('\n');
+  }
+  if (type === 'friend'){
+    return '关键特质：' + res.top.map(function(t){ return FRIEND_TRAITS[t].name; }).join(' · ');
+  }
+  return '';
+}
+
 
 /* 密码 */
 function showPwdPopup(){
@@ -1109,9 +1784,9 @@ function showPwdPopup(){
   $('pwdCopy').addEventListener('click', function(){ copyText($('pwdDisplay').textContent); });
 }
 
-/* 便签（多份，日期命名） */
+/* 便签 */
 var MEMO_KEY = 'larryMemos';
-function loadMemos(){ try { var arr = JSON.parse(localStorage.getItem(MEMO_KEY) || 'null'); if (Array.isArray(arr)) return arr; } catch(e){} 
+function loadMemos(){ try { var arr = JSON.parse(localStorage.getItem(MEMO_KEY) || 'null'); if (Array.isArray(arr)) return arr; } catch(e){}
   var old = localStorage.getItem('larryMemo');
   if (old){ var d = new Date(); var id = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
     var init = [{id: id + '_' + Date.now(), date: id, text: old}]; try { localStorage.setItem(MEMO_KEY, JSON.stringify(init)); } catch(e){} return init; }
@@ -1136,7 +1811,7 @@ function showMemoPopup(){
     var active = memos.find(function(m){ return m.id === activeId; });
     var area = $('memoArea');
     area.value = active ? active.text : '';
-    area.placeholder = active ? '随手写点什么...' : '点击右上"+ 新便签"创建';
+    area.placeholder = active ? '随手写点什么...' : '点击上方"+ 新便签"创建';
     var status = $('memoStatus');
     var timer = null;
     area.addEventListener('input', function(){
@@ -1173,7 +1848,6 @@ function showMemoPopup(){
     btn.className = 'memo-new';
     btn.textContent = '+ 新便签';
     btn.addEventListener('click', function(){
-      var d = new Date();
       var id = todayStr() + '_' + Date.now();
       memos.unshift({ id: id, date: todayStr(), text: '' });
       saveMemos(memos);
@@ -1200,44 +1874,100 @@ function showMemoPopup(){
 
 /* 番茄钟 */
 var pomoSeconds = 25 * 60, pomoTotal = 25 * 60, pomoTimer = null, pomoRunning = false;
-function renderPomo(){ var m = Math.floor(pomoSeconds / 60), s = pomoSeconds % 60; var el = $('pomoDisplay'); if (el) el.textContent = (m<10?'0':'')+m + ':' + (s<10?'0':'')+s; var ring = $('pomoRingFg'); if (ring){ var r = 90, c = 2 * Math.PI * r, offset = c * (1 - pomoSeconds / pomoTotal); ring.setAttribute('stroke-dashoffset', offset); } }
-function updatePomoSummary(){ var el = $('pomoSummary'); if (el) el.textContent = pomoRunning ? '专注中...' : (pomoTotal/60) + ' 分钟专注'; }
+function renderPomo(){
+  var m = Math.floor(pomoSeconds / 60), s = pomoSeconds % 60;
+  var el = $('pomoDisplay');
+  if (el) el.textContent = (m<10?'0':'')+m + ':' + (s<10?'0':'')+s;
+  var ring = $('pomoRingFg');
+  if (ring){
+    var r = 90, c = 2 * Math.PI * r;
+    var offset = c * (1 - pomoSeconds / pomoTotal);
+    ring.setAttribute('stroke-dashoffset', offset);
+  }
+}
+function updatePomoSummary(){
+  var el = $('pomoSummary');
+  if (el) el.textContent = pomoRunning ? '专注中...' : (pomoTotal/60) + ' 分钟专注';
+}
 function showPomoPopup(){
   var ringR = 90, ringC = 2 * Math.PI * ringR;
-  var html = '<div class="pomo-ring-wrap"><svg class="pomo-ring" viewBox="0 0 200 200"><circle class="pomo-bg" cx="100" cy="100" r="' + ringR + '"></circle><circle class="pomo-fg" id="pomoRingFg" cx="100" cy="100" r="' + ringR + '" stroke-dasharray="' + ringC + '" stroke-dashoffset="0"></circle></svg><div class="pomo-inner"><div class="pomo-display" id="pomoDisplay">25:00</div></div></div>' +
-    '<div class="pomo-modes" id="pomoModes"><button class="pomo-mode active" data-min="25">25 分钟</button><button class="pomo-mode" data-min="45">45 分钟</button><button class="pomo-mode" data-min="60">60 分钟</button></div>' +
-    '<div class="pomo-actions"><button class="btn-primary" id="pomoStart">开始</button><button class="btn-secondary" id="pomoReset">重置</button></div>';
+  var html = '<div class="pomo-ring-wrap">' +
+    '<svg class="pomo-ring" viewBox="0 0 200 200">' +
+      '<circle class="pomo-bg" cx="100" cy="100" r="' + ringR + '"></circle>' +
+      '<circle class="pomo-fg" id="pomoRingFg" cx="100" cy="100" r="' + ringR + '" ' +
+        'stroke-dasharray="' + ringC + '" stroke-dashoffset="0"></circle>' +
+    '</svg>' +
+    '<div class="pomo-inner"><div class="pomo-display" id="pomoDisplay">25:00</div></div>' +
+  '</div>' +
+  '<div class="pomo-modes" id="pomoModes">' +
+    '<button class="pomo-mode active" data-min="25">25 分钟</button>' +
+    '<button class="pomo-mode" data-min="45">45 分钟</button>' +
+    '<button class="pomo-mode" data-min="60">60 分钟</button>' +
+  '</div>' +
+  '<div class="pomo-actions">' +
+    '<button class="btn-primary" id="pomoStart">开始</button>' +
+    '<button class="btn-secondary" id="pomoReset">重置</button>' +
+  '</div>';
   openPopup('番茄钟', html);
   renderPomo();
+
   $('pomoModes').querySelectorAll('.pomo-mode').forEach(function(btn){
     btn.addEventListener('click', function(){
       if (pomoRunning) return;
       $('pomoModes').querySelectorAll('.pomo-mode').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
       var min = parseInt(btn.getAttribute('data-min'), 10);
-      pomoTotal = min * 60; pomoSeconds = pomoTotal; renderPomo(); updatePomoSummary();
+      pomoTotal = min * 60;
+      pomoSeconds = pomoTotal;
+      renderPomo();
+      updatePomoSummary();
     });
   });
+
   $('pomoStart').addEventListener('click', function(){
     var btn = this;
-    if (pomoRunning){ clearInterval(pomoTimer); pomoRunning = false; btn.textContent = '继续'; updatePomoSummary(); }
-    else {
-      pomoRunning = true; btn.textContent = '暂停'; updatePomoSummary();
+    if (pomoRunning){
+      clearInterval(pomoTimer);
+      pomoRunning = false;
+      btn.textContent = '继续';
+      updatePomoSummary();
+    } else {
+      pomoRunning = true;
+      btn.textContent = '暂停';
+      updatePomoSummary();
       pomoTimer = setInterval(function(){
         pomoSeconds--;
         if (pomoSeconds <= 0){
-          clearInterval(pomoTimer); pomoRunning = false; pomoSeconds = 0; renderPomo(); showToast('时间到！休息一下');
-          try { var ctx = new (window.AudioContext || window.webkitAudioContext)(); var osc = ctx.createOscillator(); var g = ctx.createGain(); osc.frequency.value = 800; g.gain.value = .1; osc.connect(g); g.connect(ctx.destination); osc.start(); setTimeout(function(){ osc.stop(); }, 400); } catch(e){}
+          clearInterval(pomoTimer);
+          pomoRunning = false;
+          pomoSeconds = 0;
+          renderPomo();
+          showToast('时间到！休息一下');
+          try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            var osc = ctx.createOscillator(); var g = ctx.createGain();
+            osc.frequency.value = 800; g.gain.value = .1;
+            osc.connect(g); g.connect(ctx.destination);
+            osc.start(); setTimeout(function(){ osc.stop(); }, 400);
+          } catch(e){}
           return;
         }
         renderPomo();
       }, 1000);
     }
   });
-  $('pomoReset').addEventListener('click', function(){ clearInterval(pomoTimer); pomoRunning = false; pomoSeconds = pomoTotal; renderPomo(); $('pomoStart').textContent = '开始'; updatePomoSummary(); });
+
+  $('pomoReset').addEventListener('click', function(){
+    clearInterval(pomoTimer);
+    pomoRunning = false;
+    pomoSeconds = pomoTotal;
+    renderPomo();
+    $('pomoStart').textContent = '开始';
+    updatePomoSummary();
+  });
 }
 
-/* 计算器（带符号、函数） */
+/* 计算器 */
 var calcStr = '0';
 var unitData = { length: {m:1, km:1000, cm:0.01, mm:0.001, mile:1609.344, ft:0.3048}, weight: {kg:1, g:0.001, lb:0.453592, oz:0.0283495}, temp: {C:1, F:1, K:1} };
 function calcInput(v){
@@ -1258,7 +1988,6 @@ function calcInput(v){
       calcStr = (Math.round(r * 1e10) / 1e10).toString();
     } catch(e){ calcStr = 'Error'; }
   }
-  else if (v === 'fn'){ /* placeholder */ }
   else if (v === 'π' || v === '(' || v === ')' || v === '^') calcStr += v;
   else if (v === '√') calcStr += '√(';
   else if (v === 'sin' || v === 'cos' || v === 'tan' || v === 'ln' || v === 'log') calcStr += v + '(';
@@ -1322,45 +2051,173 @@ function showCalcPopup(){
   });
 }
 
-/* 倒计时（翻页时钟） */
-function showCountPopup(){
-  var saved = localStorage.getItem('larryCountDate') || '';
-  var name = localStorage.getItem('larryCountName') || '';
-  var html = '<div class="count-inputs"><input type="text" class="input-field" id="countName" placeholder="目标名称（如：生日）" value="' + escapeAttr(name) + '"></div>' +
-    '<div class="count-inputs"><input type="date" class="input-field" id="countDate" value="' + escapeAttr(saved) + '"></div>' +
-    '<button class="btn-primary" id="countSave" style="width:100%;">保存并开始倒计时</button>' +
-    '<div id="flipWrap"></div>';
-  openPopup('倒计时', html);
+/* 倒计时（年-月-日直接输入 + 正/倒计时） */
+var COUNTS_KEY = 'larryCounts';
 
-  function renderFlip(num, unit, label){
-    var str = String(Math.abs(num));
-    var digitsHtml = '';
-    for (var i = 0; i < str.length; i++){
-      digitsHtml += '<div class="flip-digit">' + str.charAt(i) + '</div>';
+function loadCounts(){
+  try {
+    var arr = JSON.parse(localStorage.getItem(COUNTS_KEY) || 'null');
+    if (Array.isArray(arr)) return arr;
+  } catch(e){}
+  // 兼容旧版单条数据，自动迁移
+  var oldDate = localStorage.getItem('larryCountDate');
+  var oldName = localStorage.getItem('larryCountName');
+  if (oldDate && /^\d{4}-\d{2}-\d{2}$/.test(oldDate)){
+    var init = [{ id: 'c' + Date.now(), name: oldName || '目标', date: oldDate }];
+    try { localStorage.setItem(COUNTS_KEY, JSON.stringify(init)); } catch(e){}
+    return init;
+  }
+  return [];
+}
+function saveCounts(list){ try { localStorage.setItem(COUNTS_KEY, JSON.stringify(list)); } catch(e){} }
+
+function showCountPopup(){
+  var counts = loadCounts();
+  var today = new Date();
+  var thisYear = today.getFullYear();
+
+  var yearOpts = '';
+  for (var yy = thisYear - 80; yy <= thisYear + 80; yy++){
+    yearOpts += '<option value="' + yy + '">' + yy + '</option>';
+  }
+  var monthOpts = '';
+  for (var mm = 1; mm <= 12; mm++){
+    monthOpts += '<option value="' + mm + '">' + mm + '</option>';
+  }
+
+  var html =
+    '<div style="font-size:11px;color:var(--text-sub);letter-spacing:2px;text-align:center;margin-bottom:10px;">添 加 纪 念 日</div>' +
+    '<div class="count-date-row">' +
+      '<select class="count-sel count-year" id="cdY">' + yearOpts + '</select>' +
+      '<span class="count-sep">年</span>' +
+      '<select class="count-sel count-month" id="cdM">' + monthOpts + '</select>' +
+      '<span class="count-sep">月</span>' +
+      '<select class="count-sel count-day" id="cdD"></select>' +
+      '<span class="count-sep">日</span>' +
+    '</div>' +
+    '<input type="text" class="input-field" id="countName" placeholder="名称（如：生日 / 结婚纪念）" style="margin-top:14px;">' +
+    '<button class="btn-primary" id="countSave" style="width:100%;margin-top:12px;">添加纪念日</button>' +
+    '<div class="count-list-head">我 的 纪 念 日</div>' +
+    '<div id="countList"></div>';
+  openPopup('纪念日', html);
+
+  $('cdY').value = thisYear;
+  $('cdM').value = today.getMonth() + 1;
+  fillDays();
+  $('cdY').addEventListener('change', fillDays);
+  $('cdM').addEventListener('change', fillDays);
+  $('countSave').addEventListener('click', onAdd);
+
+  function fillDays(){
+    var y = parseInt($('cdY').value, 10);
+    var mo = parseInt($('cdM').value, 10);
+    var maxD = new Date(y, mo, 0).getDate();
+    var curD = parseInt($('cdD').value, 10) || today.getDate();
+    if (curD > maxD) curD = maxD;
+    var dayOpts = '';
+    for (var d = 1; d <= maxD; d++){
+      dayOpts += '<option value="' + d + '"' + (d === curD ? ' selected' : '') + '>' + d + '</option>';
     }
-    return '<div class="flip-clock">' + digitsHtml + '<span class="flip-unit">' + unit + '</span></div><div class="count-label">' + label + '</div>';
+    $('cdD').innerHTML = dayOpts;
   }
-  function updateDisplay(){
-    var d = localStorage.getItem('larryCountDate');
-    var n = localStorage.getItem('larryCountName') || '目标';
-    var wrap = $('flipWrap');
-    if (!d){ wrap.innerHTML = '<div class="count-empty">还没有设置目标日期</div>'; return; }
-    var target = new Date(d + 'T00:00:00'), now = new Date();
-    var days = Math.ceil((target - now) / 86400000);
-    if (days > 0){ wrap.innerHTML = renderFlip(days, '天', escapeHtml(n) + ' 还有'); }
-    else if (days === 0){ wrap.innerHTML = renderFlip(0, '', '今天就是 ' + escapeHtml(n)); }
-    else { wrap.innerHTML = renderFlip(Math.abs(days), '天', escapeHtml(n) + ' 已经过去'); }
+
+  function onAdd(){
+    var y = parseInt($('cdY').value, 10);
+    var mo = parseInt($('cdM').value, 10);
+    var d = parseInt($('cdD').value, 10);
+    var n = $('countName').value.trim() || '未命名';
+    var moStr = mo < 10 ? '0' + mo : '' + mo;
+    var dStr = d < 10 ? '0' + d : '' + d;
+    var dateStr = y + '-' + moStr + '-' + dStr;
+    counts.unshift({
+      id: 'c' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+      name: n,
+      date: dateStr
+    });
+    saveCounts(counts);
+    $('countName').value = '';
+    renderList();
+    showToast('已添加');
   }
-  $('countSave').addEventListener('click', function(){
-    var d = $('countDate').value, n = $('countName').value.trim() || '目标';
-    if (!d){ showToast('请选择日期'); return; }
-    try { localStorage.setItem('larryCountDate', d); localStorage.setItem('larryCountName', n); } catch(e){}
-    updateDisplay(); showToast('已保存');
-  });
-  updateDisplay();
+
+  function diffYMD(from, to){
+    var y = to.getFullYear() - from.getFullYear();
+    var m = to.getMonth() - from.getMonth();
+    var d = to.getDate() - from.getDate();
+    if (d < 0){
+      m -= 1;
+      var lastMonthDays = new Date(to.getFullYear(), to.getMonth(), 0).getDate();
+      d += lastMonthDays;
+    }
+    if (m < 0){ y -= 1; m += 12; }
+    return { y: y, m: m, d: d };
+  }
+
+  function renderYMD(obj){
+    var y = obj.y, m = obj.m, d = obj.d;
+    var parts = [];
+    if (y > 0) parts.push('<span class="count-num">' + y + '</span><span class="count-unit">年</span>');
+    if (m > 0) parts.push('<span class="count-num">' + m + '</span><span class="count-unit">月</span>');
+    if (d > 0 || (y === 0 && m === 0)) parts.push('<span class="count-num">' + d + '</span><span class="count-unit">天</span>');
+    return '<div class="count-result">' + parts.join('') + '</div>';
+  }
+
+  function renderList(){
+    var listEl = $('countList');
+    if (!counts.length){
+      listEl.innerHTML = '<div class="count-empty-list">还没有纪念日，上面添加一个吧</div>';
+      return;
+    }
+    var now = new Date();
+    now.setHours(0,0,0,0);
+    var html = '';
+    counts.forEach(function(c){
+      var m = c.date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) return;
+      var target = new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
+      var tag, body;
+      if (target.getTime() > now.getTime()){
+        tag = '倒计时';
+        body = renderYMD(diffYMD(now, target));
+      } else if (target.getTime() === now.getTime()){
+        tag = '今天';
+        body = '<div class="count-result"><span class="count-num" style="font-size:22px;">就 是 今 天</span></div>';
+      } else {
+        tag = '正计时';
+        body = renderYMD(diffYMD(target, now));
+      }
+      var dateShow = m[1] + '.' + m[2] + '.' + m[3];
+      html += '<div class="count-item">' +
+        '<div class="count-item-head">' +
+          '<div class="count-item-name">' + escapeHtml(c.name) + '</div>' +
+          '<div class="count-item-date">' + dateShow + ' · ' + tag + '</div>' +
+          '<button class="count-del" data-del="' + escapeHtml(c.id) + '" title="删除">×</button>' +
+        '</div>' +
+        body +
+      '</div>';
+    });
+    listEl.innerHTML = html;
+
+    listEl.querySelectorAll('[data-del]').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var id = btn.getAttribute('data-del');
+        var item = null;
+        for (var i = 0; i < counts.length; i++){ if (counts[i].id === id){ item = counts[i]; break; } }
+        if (!item) return;
+        if (!confirm('删除「' + item.name + '」？')) return;
+        counts = counts.filter(function(x){ return x.id !== id; });
+        saveCounts(counts);
+        renderList();
+        showToast('已删除');
+      });
+    });
+  }
+
+  renderList();
 }
 
-/* 日历（点选日期） */
+/* 日历 */
 function getZodiac(month, day){
   var ranges = [[1,20,'水瓶座'],[2,19,'双鱼座'],[3,21,'白羊座'],[4,20,'金牛座'],[5,21,'双子座'],[6,22,'巨蟹座'],[7,23,'狮子座'],[8,23,'处女座'],[9,23,'天秤座'],[10,24,'天蝎座'],[11,23,'射手座'],[12,22,'摩羯座']];
   var idx = month - 1;
@@ -1380,53 +2237,138 @@ function getYiJi(date){
 function renderCalMini(){ var now = new Date(); $('calMini').textContent = (now.getMonth()+1) + '月' + now.getDate() + '日 · 星期' + weekdayCN[now.getDay()]; }
 renderCalMini();
 
-function showCalendarPopup(){
-  var now = new Date();
-  var y = now.getFullYear(), m = now.getMonth(), today = now.getDate();
-  var selected = new Date(y, m, today);
-  var firstDay = new Date(y, m, 1).getDay();
-  var daysInMonth = new Date(y, m+1, 0).getDate();
-  var prevMonthDays = new Date(y, m, 0).getDate();
+/* 日历（可切月 + 节日标注） */
+var FIXED_HOLIDAYS = {
+  '01-01': '元旦', '02-14': '情人节', '03-08': '妇女节', '03-12': '植树节',
+  '04-01': '愚人节', '05-01': '劳动节', '05-04': '青年节', '06-01': '儿童节',
+  '07-01': '建党节', '08-01': '建军节', '09-10': '教师节', '10-01': '国庆节',
+  '11-11': '双十一', '12-24': '平安夜', '12-25': '圣诞节'
+};
+// 农历节日（手动整理 2024-2030），日期都是阳历对应日
+var LUNAR_HOLIDAYS = {
+  '2024-02-10':'春节','2024-02-24':'元宵','2024-04-04':'清明','2024-06-10':'端午','2024-08-10':'七夕','2024-09-17':'中秋','2024-10-11':'重阳','2025-01-01':'元旦','2025-01-28':'除夕','2025-01-29':'春节','2025-02-12':'元宵','2025-04-04':'清明','2025-05-31':'端午','2025-08-29':'七夕','2025-10-06':'中秋','2025-10-29':'重阳',
+  '2026-02-16':'除夕','2026-02-17':'春节','2026-03-03':'元宵','2026-04-05':'清明','2026-06-19':'端午','2026-08-19':'七夕','2026-09-25':'中秋','2026-10-18':'重阳','2027-02-05':'除夕','2027-02-06':'春节','2027-02-20':'元宵','2027-04-05':'清明','2027-06-09':'端午','2027-08-08':'七夕','2027-09-15':'中秋','2027-10-08':'重阳',
+  '2028-01-25':'除夕','2028-01-26':'春节','2028-02-09':'元宵','2028-04-04':'清明','2028-05-28':'端午','2028-07-27':'七夕','2028-10-03':'中秋','2028-10-26':'重阳','2029-02-12':'除夕','2029-02-13':'春节','2029-02-27':'元宵','2029-04-04':'清明','2029-06-16':'端午','2029-08-16':'七夕','2029-09-22':'中秋','2029-10-15':'重阳','2030-02-02':'除夕','2030-02-03':'春节','2030-02-17':'元宵','2030-04-05':'清明','2030-06-05':'端午','2030-08-05':'七夕','2030-09-12':'中秋','2030-10-05':'重阳'
+};
+function getHoliday(y, m, d){
+  var mm = (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d);
+  var full = y + '-' + mm;
+  if (LUNAR_HOLIDAYS[full]) return LUNAR_HOLIDAYS[full];
+  if (FIXED_HOLIDAYS[mm]) return FIXED_HOLIDAYS[mm];
+  return '';
+}
+  function showCalendarPopup(){
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  var viewYear = today.getFullYear();
+  var viewMonth = today.getMonth() + 1;
+  var selected = new Date(today.getTime());
 
-  var html = '<div class="cal-header"><div class="cal-title">' + y + ' 年 ' + (m+1) + ' 月</div></div>';
-  html += '<div class="cal-grid">';
-  ['日','一','二','三','四','五','六'].forEach(function(w){ html += '<div class="cal-weekday">' + w + '</div>'; });
-  for (var i = 0; i < firstDay; i++){
-    var pd = prevMonthDays - firstDay + i + 1;
-    html += '<div class="cal-day other">' + pd + '</div>';
-  }
-  for (var d = 1; d <= daysInMonth; d++){
-    var isToday = (d === today);
-    html += '<div class="cal-day' + (isToday ? ' selected' : '') + '" data-day="' + d + '">' + d + '</div>';
-  }
-  html += '</div>';
-  html += '<div class="cal-info" id="calInfo"></div>';
-  html += '<div class="cal-disclaimer">仅供娱乐</div>';
-  openPopup('日历', html);
+  function dateKey(d){ return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate(); }
 
-  function renderInfo(date){
-    var zodiac = getZodiac(date.getMonth()+1, date.getDate());
-    var yiji = getYiJi(date);
-    var dateStr = (date.getMonth()+1) + ' 月 ' + date.getDate() + ' 日';
-    $('calInfo').innerHTML =
+  function buildMonth(){
+    var firstDay = new Date(viewYear, viewMonth - 1, 1).getDay();
+    var daysInMonth = new Date(viewYear, viewMonth, 0).getDate();
+    var todayStr = dateKey(today);
+    var selStr = dateKey(selected);
+
+    var html = '<div class="cal-header">' +
+      '<button class="cal-nav" id="calPrev" type="button">‹</button>' +
+      '<div class="cal-title">' + viewYear + ' 年 ' + viewMonth + ' 月</div>' +
+      '<button class="cal-nav" id="calNext" type="button">›</button>' +
+      '</div>';
+    html += '<div class="cal-grid" id="calGrid">';
+    ['日','一','二','三','四','五','六'].forEach(function(w){ html += '<div class="cal-weekday">' + w + '</div>'; });
+    for (var i = 0; i < firstDay; i++){ html += '<div class="cal-day other"></div>'; }
+    for (var d = 1; d <= daysInMonth; d++){
+      var full = viewYear + '-' + viewMonth + '-' + d;
+      var cls = 'cal-day';
+      if (full === selStr && full !== todayStr) cls += ' selected';
+      if (full === todayStr) cls += ' today';
+      if (full === selStr && full === todayStr) cls += ' selected-today';
+      var holiday = getHoliday(viewYear, viewMonth, d);
+      html += '<div class="' + cls + '" data-day="' + d + '">' +
+        '<span class="cal-day-num">' + d + '</span>' +
+        (holiday ? '<span class="cal-holiday">' + holiday + '</span>' : '') +
+      '</div>';
+    }
+    html += '</div>';
+    html += '<div class="cal-info" id="calInfo"></div>';
+    html += '<div class="cal-disclaimer">仅供娱乐</div>';
+    popupContent.innerHTML = html;
+
+    // 每格单独绑，但只在切月/打开时绑一次
+    popupContent.querySelectorAll('.cal-day[data-day]').forEach(function(cell){
+      cell.addEventListener('click', onDayClick);
+    });
+    $('calPrev').addEventListener('click', prevMonthFn);
+    $('calNext').addEventListener('click', nextMonthFn);
+
+    updateInfo();
+  }
+
+  // 点击日期：只更新 class + 下面信息，不重建 DOM
+  function onDayClick(e){
+    var cell = e.currentTarget;
+    var dd = parseInt(cell.getAttribute('data-day'), 10);
+    if (isNaN(dd)) return;
+    selected = new Date(viewYear, viewMonth - 1, dd);
+    updateSelection();
+    updateInfo();
+  }
+
+  function updateSelection(){
+    var todayStr = dateKey(today);
+    var selStr = dateKey(selected);
+    popupContent.querySelectorAll('.cal-day[data-day]').forEach(function(cell){
+      var dd = parseInt(cell.getAttribute('data-day'), 10);
+      var full = viewYear + '-' + viewMonth + '-' + dd;
+      cell.classList.remove('selected', 'today', 'selected-today');
+      if (full === selStr && full !== todayStr) cell.classList.add('selected');
+      if (full === todayStr) cell.classList.add('today');
+      if (full === selStr && full === todayStr) cell.classList.add('selected-today');
+    });
+  }
+
+  function updateInfo(){
+    var zodiac = getZodiac(selected.getMonth()+1, selected.getDate());
+    var yiji = getYiJi(selected);
+    var dateStr = (selected.getMonth()+1) + ' 月 ' + selected.getDate() + ' 日';
+    var holiday = getHoliday(selected.getFullYear(), selected.getMonth()+1, selected.getDate());
+    var holidayLine = holiday ? '<div class="cal-info-row"><div class="cal-info-label">节日</div><div class="cal-info-val" style="color:var(--accent);font-weight:600;">' + holiday + '</div></div>' : '';
+    var infoEl = $('calInfo');
+    if (!infoEl) return;
+    infoEl.innerHTML =
       '<div class="cal-info-row"><div class="cal-info-label">' + dateStr + '</div><div class="cal-info-val">' + zodiac + '</div></div>' +
+      holidayLine +
       '<div class="cal-info-row"><div class="cal-info-label">宜</div><div class="cal-info-val">' + yiji.yi + '</div></div>' +
       '<div class="cal-info-row"><div class="cal-info-label">忌</div><div class="cal-info-val">' + yiji.ji + '</div></div>';
   }
-  renderInfo(selected);
 
-  popupContent.querySelectorAll('.cal-day[data-day]').forEach(function(el){
-    el.addEventListener('click', function(){
-      var d = parseInt(el.getAttribute('data-day'), 10);
-      popupContent.querySelectorAll('.cal-day').forEach(function(x){ x.classList.remove('selected'); });
-      el.classList.add('selected');
-      selected = new Date(y, m, d);
-      renderInfo(selected);
-    });
-  });
+  function prevMonthFn(){
+    viewMonth--;
+    if (viewMonth < 1){ viewMonth = 12; viewYear--; }
+    var maxD = new Date(viewYear, viewMonth, 0).getDate();
+    if (selected.getDate() > maxD) selected.setDate(maxD);
+    selected.setFullYear(viewYear);
+    selected.setMonth(viewMonth - 1);
+    buildMonth();
+  }
+  function nextMonthFn(){
+    viewMonth++;
+    if (viewMonth > 12){ viewMonth = 1; viewYear++; }
+    var maxD = new Date(viewYear, viewMonth, 0).getDate();
+    if (selected.getDate() > maxD) selected.setDate(maxD);
+    selected.setFullYear(viewYear);
+    selected.setMonth(viewMonth - 1);
+    buildMonth();
+  }
+
+  openPopup('日历', '');
+  buildMonth();
 }
 
-/* 思维导图（垂直树状） */
+/* 思维导图 */
 var MIND_KEY = 'larryMindTree';
 function defaultMind(){ return { root: { id:'root', text:'中心主题', children: [] } }; }
 function loadMind(){
@@ -1560,9 +2502,15 @@ function showMindPopup(){
 function showToolsMenu(){
   var html = '<div class="tool-menu">' +
     '<div class="tool-item" data-tool="palette"><div><div class="name">🎨 图片调色</div><div class="desc">导入图片，调亮度、对比度、饱和度</div></div><div class="arrow">›</div></div>' +
+    '<div class="tool-item" data-tool="convert"><div><div class="name">🔄 图片格式转换</div><div class="desc">PNG / JPG / WebP 互转</div></div><div class="arrow">›</div></div>' +
     '<div class="tool-item" data-tool="random"><div><div class="name">🎲 随机数</div><div class="desc">按指定位数生成随机数</div></div><div class="arrow">›</div></div>' +
     '<div class="tool-item" data-tool="color"><div><div class="name">🎯 颜色拾取</div><div class="desc">选择颜色并复制 HEX / RGB</div></div><div class="arrow">›</div></div>' +
     '<div class="tool-item" data-tool="qr"><div><div class="name">📱 二维码</div><div class="desc">文字或网址转二维码</div></div><div class="arrow">›</div></div>' +
+    '<div class="tool-item" data-tool="html"><div><div class="name">📄 HTML 转义</div><div class="desc">转义 / 反转义 HTML 实体</div></div><div class="arrow">›</div></div>' +
+    '<div class="tool-item" data-tool="b64"><div><div class="name">🧬 Base64 编解码</div><div class="desc">文本与 Base64 互转</div></div><div class="arrow">›</div></div>' +
+    '<div class="tool-item" data-tool="url"><div><div class="name">🔗 URL 编解码</div><div class="desc">encodeURIComponent / decodeURIComponent</div></div><div class="arrow">›</div></div>' +
+    '<div class="tool-item" data-tool="json"><div><div class="name">🧩 JSON 格式化</div><div class="desc">美化 / 压缩 JSON</div></div><div class="arrow">›</div></div>' +
+    '<div class="tool-item" data-tool="text"><div><div class="name">🔤 文本大小写</div><div class="desc">大小写、驼峰、下划线等转换</div></div><div class="arrow">›</div></div>' +
     '<div class="tool-item" data-tool="backup"><div><div class="name">💾 数据备份</div><div class="desc">导出 / 导入 / 清空所有数据</div></div><div class="arrow">›</div></div>' +
     '</div>';
   openPopup('工具台', html);
@@ -1570,16 +2518,293 @@ function showToolsMenu(){
     el.addEventListener('click', function(){
       var t = el.getAttribute('data-tool');
       if (t === 'palette') showPalette();
+      else if (t === 'convert') showImgConvert();
       else if (t === 'random') showRandom();
       else if (t === 'color') showColorPicker();
       else if (t === 'qr') showQR();
+      else if (t === 'html') showHtmlEscape();
+      else if (t === 'b64') showBase64();
+      else if (t === 'url') showUrlCodec();
+      else if (t === 'json') showJsonFmt();
+      else if (t === 'text') showTextCase();
       else if (t === 'backup') showBackup();
     });
   });
 }
 
-/* ============ 数据备份 ============ */
-var BACKUP_KEYS = ['larryTodos','larryMemos','larryQuoteBag','larryPwdHistory','larryCountDate','larryCountName','larryMindTree'];
+/* 图片格式转换 */
+function showImgConvert(){
+  var html =
+    '<input type="file" id="convFile" accept="image/*" style="margin-bottom:14px;font-size:13px;">' +
+    '<div id="convPreview"></div>';
+  openPopup('图片格式转换', html);
+  $('convFile').addEventListener('change', function(e){
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function(){
+      var w = img.width, h = img.height;
+      var prev =
+        '<img src="' + url + '" style="width:100%;max-height:260px;object-fit:contain;border-radius:12px;margin-bottom:14px;">' +
+        '<div style="font-size:12px;color:var(--text-sub);margin-bottom:10px;text-align:center;">' + w + ' × ' + h + ' px · ' + file.type + ' · ' + (file.size/1024).toFixed(1) + ' KB</div>' +
+        '<div style="font-size:13px;color:var(--text-sub);margin-bottom:8px;">输出格式</div>' +
+        '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
+          '<button class="btn-secondary conv-fmt" data-fmt="image/jpeg" data-ext="jpg" style="flex:1;">JPG</button>' +
+          '<button class="btn-secondary conv-fmt" data-fmt="image/png" data-ext="png" style="flex:1;">PNG</button>' +
+          '<button class="btn-secondary conv-fmt" data-fmt="image/webp" data-ext="webp" style="flex:1;">WebP</button>' +
+        '</div>' +
+        '<div id="convQWrap" style="margin-bottom:14px;">' +
+          '<div style="font-size:13px;color:var(--text-sub);margin-bottom:6px;">质量：<span id="convQVal">92</span>%</div>' +
+          '<input type="range" id="convQ" min="10" max="100" value="92" style="width:100%;accent-color:var(--accent);">' +
+        '</div>' +
+        '<button class="btn-primary" id="convGo" style="width:100%;">转换并下载</button>';
+      $('convPreview').innerHTML = prev;
+      var curFmt = 'image/jpeg';
+      var curExt = 'jpg';
+      popupContent.querySelectorAll('.conv-fmt').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          popupContent.querySelectorAll('.conv-fmt').forEach(function(b){ b.style.background = ''; b.style.borderColor = ''; });
+          btn.style.background = 'var(--accent-soft)';
+          btn.style.borderColor = 'var(--accent)';
+          curFmt = btn.getAttribute('data-fmt');
+          curExt = btn.getAttribute('data-ext');
+          $('convQWrap').style.display = (curFmt === 'image/png') ? 'none' : 'block';
+        });
+      });
+      popupContent.querySelectorAll('.conv-fmt')[0].click();
+      $('convQ').addEventListener('input', function(){ $('convQVal').textContent = this.value; });
+      $('convGo').addEventListener('click', function(){
+        var c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        var ctx = c.getContext('2d');
+        if (curFmt === 'image/jpeg'){ ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); }
+        ctx.drawImage(img, 0, 0);
+        var q = parseInt($('convQ').value, 10) / 100;
+        c.toBlob(function(blob){
+          if (!blob){ showToast('转换失败'); return; }
+          var newUrl = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          var base = (file.name || 'image').replace(/\.[^.]+$/, '');
+          a.href = newUrl; a.download = base + '.' + curExt;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(function(){ URL.revokeObjectURL(newUrl); }, 1000);
+          showToast('已下载 ' + curExt.toUpperCase());
+        }, curFmt, q);
+      });
+    };
+    img.onerror = function(){ showToast('图片加载失败'); };
+    img.src = url;
+  });
+}
+
+/* HTML 转义 */
+function showHtmlEscape(){
+  var html =
+    '<textarea class="input-field" id="heIn" placeholder="输入内容..." style="min-height:140px;font-family:ui-monospace,Menlo,monospace;font-size:13px;resize:vertical;"></textarea>' +
+    '<div style="display:flex;gap:8px;margin:10px 0;">' +
+      '<button class="btn-primary" id="heEsc" style="flex:1;">转义</button>' +
+      '<button class="btn-secondary" id="heUn" style="flex:1;">反转义</button>' +
+    '</div>' +
+    '<textarea class="input-field" id="heOut" placeholder="输出..." readonly style="min-height:140px;font-family:ui-monospace,Menlo,monospace;font-size:13px;resize:vertical;"></textarea>' +
+    '<button class="btn-secondary" id="heCopy" style="width:100%;margin-top:10px;">复制结果</button>';
+  openPopup('HTML 转义', html);
+  $('heEsc').addEventListener('click', function(){
+    $('heOut').value = $('heIn').value.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  });
+  $('heUn').addEventListener('click', function(){
+    $('heOut').value = $('heIn').value.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&');
+  });
+  $('heCopy').addEventListener('click', function(){ copyText($('heOut').value); });
+}
+
+/* Base64 */
+function showBase64(){
+  var html =
+    '<textarea class="input-field" id="b64In" placeholder="输入内容..." style="min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size:13px;resize:vertical;"></textarea>' +
+    '<div style="display:flex;gap:8px;margin:10px 0;">' +
+      '<button class="btn-primary" id="b64Enc" style="flex:1;">编码</button>' +
+      '<button class="btn-secondary" id="b64Dec" style="flex:1;">解码</button>' +
+    '</div>' +
+    '<textarea class="input-field" id="b64Out" placeholder="输出..." readonly style="min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size:13px;resize:vertical;"></textarea>' +
+    '<button class="btn-secondary" id="b64Copy" style="width:100%;margin-top:10px;">复制结果</button>';
+  openPopup('Base64', html);
+  $('b64Enc').addEventListener('click', function(){
+    try { $('b64Out').value = btoa(unescape(encodeURIComponent($('b64In').value))); }
+    catch(e){ showToast('编码失败'); }
+  });
+  $('b64Dec').addEventListener('click', function(){
+    try { $('b64Out').value = decodeURIComponent(escape(atob($('b64In').value.trim()))); }
+    catch(e){ showToast('不是合法的 Base64'); }
+  });
+  $('b64Copy').addEventListener('click', function(){ copyText($('b64Out').value); });
+}
+
+/* URL 编解码 */
+function showUrlCodec(){
+  var html =
+    '<textarea class="input-field" id="urlIn" placeholder="输入内容..." style="min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size:13px;resize:vertical;"></textarea>' +
+    '<div style="display:flex;gap:8px;margin:10px 0;">' +
+      '<button class="btn-primary" id="urlEnc" style="flex:1;">编码</button>' +
+      '<button class="btn-secondary" id="urlDec" style="flex:1;">解码</button>' +
+    '</div>' +
+    '<textarea class="input-field" id="urlOut" placeholder="输出..." readonly style="min-height:130px;font-family:ui-monospace,Menlo,monospace;font-size:13px;resize:vertical;"></textarea>' +
+    '<button class="btn-secondary" id="urlCopy" style="width:100%;margin-top:10px;">复制结果</button>';
+  openPopup('URL 编解码', html);
+  $('urlEnc').addEventListener('click', function(){ $('urlOut').value = encodeURIComponent($('urlIn').value); });
+  $('urlDec').addEventListener('click', function(){
+    try { $('urlOut').value = decodeURIComponent($('urlIn').value); }
+    catch(e){ showToast('解码失败'); }
+  });
+  $('urlCopy').addEventListener('click', function(){ copyText($('urlOut').value); });
+}
+
+/* JSON 格式化 */
+function showJsonFmt(){
+  var html =
+    '<textarea class="input-field" id="jsIn" placeholder="粘贴 JSON..." style="min-height:180px;font-family:ui-monospace,Menlo,monospace;font-size:13px;resize:vertical;"></textarea>' +
+    '<div style="display:flex;gap:8px;margin:10px 0;">' +
+      '<button class="btn-primary" id="jsFmt" style="flex:1;">美化</button>' +
+      '<button class="btn-secondary" id="jsMin" style="flex:1;">压缩</button>' +
+    '</div>' +
+    '<textarea class="input-field" id="jsOut" placeholder="输出..." readonly style="min-height:180px;font-family:ui-monospace,Menlo,monospace;font-size:13px;resize:vertical;"></textarea>' +
+    '<button class="btn-secondary" id="jsCopy" style="width:100%;margin-top:10px;">复制结果</button>';
+  openPopup('JSON 格式化', html);
+  function tryParse(){
+    try { return JSON.parse($('jsIn').value); }
+    catch(e){ showToast('JSON 语法错误'); return null; }
+  }
+  $('jsFmt').addEventListener('click', function(){
+    var o = tryParse(); if (o === null) return;
+    $('jsOut').value = JSON.stringify(o, null, 2);
+  });
+  $('jsMin').addEventListener('click', function(){
+    var o = tryParse(); if (o === null) return;
+    $('jsOut').value = JSON.stringify(o);
+  });
+  $('jsCopy').addEventListener('click', function(){ copyText($('jsOut').value); });
+}
+
+/* 文本大小写 */
+function showTextCase(){
+  var html =
+    '<textarea class="input-field" id="tcIn" placeholder="输入文本..." style="min-height:130px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0;">' +
+      '<button class="btn-secondary" data-case="upper">全大写</button>' +
+      '<button class="btn-secondary" data-case="lower">全小写</button>' +
+      '<button class="btn-secondary" data-case="cap">首字母大写</button>' +
+      '<button class="btn-secondary" data-case="camel">驼峰 camelCase</button>' +
+      '<button class="btn-secondary" data-case="pascal">PascalCase</button>' +
+      '<button class="btn-secondary" data-case="snake">下划线 snake_case</button>' +
+      '<button class="btn-secondary" data-case="kebab">中划线 kebab-case</button>' +
+      '<button class="btn-secondary" data-case="reverse">反转字符串</button>' +
+    '</div>' +
+    '<textarea class="input-field" id="tcOut" placeholder="输出..." readonly style="min-height:130px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>' +
+    '<button class="btn-secondary" id="tcCopy" style="width:100%;margin-top:10px;">复制结果</button>';
+  openPopup('文本大小写', html);
+  popupContent.querySelectorAll('[data-case]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var s = $('tcIn').value;
+      var k = btn.getAttribute('data-case');
+      var r = '';
+      if (k === 'upper') r = s.toUpperCase();
+      else if (k === 'lower') r = s.toLowerCase();
+      else if (k === 'cap') r = s.replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+      else if (k === 'camel') r = s.trim().split(/[\s_\-]+/).map(function(w,i){ return i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); }).join('');
+      else if (k === 'pascal') r = s.trim().split(/[\s_\-]+/).map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); }).join('');
+      else if (k === 'snake') r = s.trim().replace(/([A-Z])/g, '_$1').replace(/[\s\-]+/g, '_').toLowerCase().replace(/^_/, '');
+      else if (k === 'kebab') r = s.trim().replace(/([A-Z])/g, '-$1').replace(/[\s_]+/g, '-').toLowerCase().replace(/^-/, '');
+      else if (k === 'reverse') r = s.split('').reverse().join('');
+      $('tcOut').value = r;
+    });
+  });
+  $('tcCopy').addEventListener('click', function(){ copyText($('tcOut').value); });
+}
+
+/* 图片调色 */
+function showPalette(){
+  var html = '<div style="text-align:center;color:var(--text-sub);font-size:13px;padding:10px 0;">' +
+    '<input type="file" id="paletteFile" accept="image/*" style="margin-bottom:14px;font-size:13px;">' +
+    '<div id="palettePreview"></div></div>';
+  openPopup('图片调色', html);
+  $('paletteFile').addEventListener('change', function(e){
+    var file = e.target.files && e.target.files[0]; if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      $('palettePreview').innerHTML =
+        '<img class="palette-img" id="paletteImg" src="' + ev.target.result + '">' +
+        '<div class="palette-row">' +
+          '<span class="palette-label">亮度 <span class="val" id="brVal">100</span></span>' +
+          '<input type="range" class="palette-slider" id="brSlider" min="0" max="200" value="100">' +
+        '</div>' +
+        '<div class="palette-row">' +
+          '<span class="palette-label">对比度 <span class="val" id="ctVal">100</span></span>' +
+          '<input type="range" class="palette-slider" id="ctSlider" min="0" max="200" value="100">' +
+        '</div>' +
+        '<div class="palette-row">' +
+          '<span class="palette-label">饱和度 <span class="val" id="stVal">100</span></span>' +
+          '<input type="range" class="palette-slider" id="stSlider" min="0" max="200" value="100">' +
+        '</div>';
+      var imgEl = $('paletteImg');
+      function update(){
+        var b = $('brSlider').value, c = $('ctSlider').value, s = $('stSlider').value;
+        $('brVal').textContent = b; $('ctVal').textContent = c; $('stVal').textContent = s;
+        imgEl.style.filter = 'brightness(' + b + '%) contrast(' + c + '%) saturate(' + s + '%)';
+      }
+      ['brSlider','ctSlider','stSlider'].forEach(function(id){ $(id).addEventListener('input', update); });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* 随机数 */
+function showRandom(){
+  var html = '<div style="font-size:13px;color:var(--text-sub);margin-bottom:8px;">位数（1-10 位）</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
+      '<input type="number" class="input-field" id="randDigits" value="6" min="1" max="10" placeholder="位数">' +
+      '<button class="btn-primary" id="randGen" style="flex-shrink:0;">生成</button>' +
+    '</div>' +
+    '<div style="text-align:center;font-size:44px;font-weight:700;color:var(--accent);margin-top:20px;font-family:Iowan Old Style,Georgia,serif;letter-spacing:2px;" id="randResult">—</div>';
+  openPopup('随机数', html);
+  $('randGen').addEventListener('click', function(){
+    var digits = parseInt($('randDigits').value, 10);
+    if (isNaN(digits) || digits < 1 || digits > 10){ showToast('请输入 1-10 之间的位数'); return; }
+    var min = Math.pow(10, digits - 1), max = Math.pow(10, digits) - 1;
+    if (digits === 1) min = 0;
+    $('randResult').textContent = Math.floor(Math.random() * (max - min + 1)) + min;
+  });
+}
+
+/* 颜色拾取 */
+function showColorPicker(){
+  var html = '<div class="color-preview" id="colorPreview" style="background:#b29d7a;"></div>' +
+    '<div class="color-row"><input type="color" id="colorInput" value="#b29d7a"><input type="text" class="input-field" id="colorHex" value="#b29d7a" style="font-family:Iowan Old Style,Georgia,monospace;"></div>' +
+    '<div style="font-size:12px;color:var(--text-sub);margin-top:8px;">RGB：<span id="colorRgb">178, 157, 122</span></div>' +
+    '<div style="display:flex;gap:8px;margin-top:14px;"><button class="btn-primary" id="colorCopyHex" style="flex:1;">复制 HEX</button><button class="btn-secondary" id="colorCopyRgb" style="flex:1;">复制 RGB</button></div>';
+  openPopup('颜色拾取', html);
+  function update(hex){ var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16); $('colorPreview').style.background = hex; $('colorHex').value = hex; $('colorRgb').textContent = r + ', ' + g + ', ' + b; }
+  $('colorInput').addEventListener('input', function(){ update(this.value); });
+  $('colorHex').addEventListener('input', function(){ if (/^#[0-9a-fA-F]{6}$/.test(this.value)) update(this.value); });
+  $('colorCopyHex').addEventListener('click', function(){ copyText($('colorHex').value); });
+  $('colorCopyRgb').addEventListener('click', function(){ copyText($('colorRgb').textContent); });
+}
+
+/* 二维码 */
+function showQR(){
+  var html = '<input type="text" class="input-field" id="qrInput" placeholder="输入文字或网址" style="margin-bottom:12px;">' +
+    '<button class="btn-primary" id="qrGen" style="width:100%;">生成二维码</button>' +
+    '<div id="qrResult" class="qr-placeholder">输入内容后点击生成</div>' +
+    '<div style="font-size:11px;color:var(--text-sub);text-align:center;margin-top:12px;">二维码生成功能将在后续版本接入</div>';
+  openPopup('二维码', html);
+  $('qrGen').addEventListener('click', function(){
+    var v = $('qrInput').value.trim();
+    if (!v){ showToast('请输入内容'); return; }
+    $('qrResult').innerHTML = '<div style="padding:20px;">功能开发中，敬请期待</div>';
+  });
+}
+
+/* 数据备份 */
+var BACKUP_KEYS = ['larryTodos','larryMemos','larryQuoteBag','larryPwdHistory','larryCounts','larryCountDate','larryCountName','larryMindTree'];
 
 function showBackup(){
   var stat = {};
@@ -1603,7 +2828,7 @@ function showBackup(){
       ['便签', stat.larryMemos || 0, '份'],
       ['密码历史', stat.larryPwdHistory || 0, '条'],
       ['思维导图', stat.larryMindTree ? 1 : 0, '棵'],
-      ['倒计时', stat.larryCountDate ? 1 : 0, '个'],
+      ['纪念日', stat.larryCounts || 0, '个'],
       ['文案袋', stat.larryQuoteBag ? 1 : 0, '组'],
       ['背景图', hasBg ? 1 : 0, '张']
     ];
@@ -1626,9 +2851,7 @@ function showBackup(){
       '<div style="font-size:11px;color:var(--text-sub);opacity:.6;text-align:center;margin-top:8px;">操作前建议先导出备份</div></div>';
     openPopup('数据备份', html);
 
-    $('bkExport').addEventListener('click', function(){
-      exportData($('bkIncludeBg').checked);
-    });
+    $('bkExport').addEventListener('click', function(){ exportData($('bkIncludeBg').checked); });
     $('bkImport').addEventListener('click', function(){
       var input = document.createElement('input');
       input.type = 'file';
@@ -1638,10 +2861,8 @@ function showBackup(){
         if (!f) return;
         var reader = new FileReader();
         reader.onload = function(ev){
-          try {
-            var json = JSON.parse(ev.target.result);
-            importData(json);
-          } catch(err){ showToast('文件解析失败'); }
+          try { var json = JSON.parse(ev.target.result); importData(json); }
+          catch(err){ showToast('文件解析失败'); }
         };
         reader.readAsText(f);
       };
@@ -1774,19 +2995,29 @@ document.querySelectorAll('.grid-item').forEach(function(card){
 });
 
 /* 启动 */
-loadBgFromDB().then(function(blob){ if (blob){ userBgBlob = blob; setMode('image'); } else { setMode('color'); } });
+loadBgFromDB().then(function函数(blob){ if (blob){ userBgBlob = blob; setMode('image'); } else { setMode('color'); } });
 loadWeather();
 loadQuotes();
 updateTodoSummary();
 updatePomoSummary();
 
+/* 后台预加载背景图（首次访问 3 秒后悄悄下载，让 SW 缓存） */
+window.addEventListener('load', function函数(){
+  setTimeout(function函数(){
+    presetBackgrounds.forEach(function函数(url){
+      var img = new Image();
+      img.src = url;
+    });
+  }, 3000);
+});
+
 /* 防盗 */
-document.addEventListener('contextmenu', function(e){ e.preventDefault(); });
-document.addEventListener('dragstart', function(e){ if (e.target.tagName === 'IMG') e.preventDefault(); });
-document.addEventListener('keydown', function(e){
-  if (e.key === 'F12'){ e.preventDefault(); return false; }
-  if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')){ e.preventDefault(); return false; }
-  if (e.ctrlKey && (e.key === 'u' || e.key === 'U')){ e.preventDefault(); return false; }
+document.addEventListener添加事件监听器('contextmenu', function函数(e){ e.preventDefault(); });文档.addEventListener添加事件监听器('contextmenu', 函数(e){ e.preventDefault(); });
+document.addEventListener添加事件监听器('dragstart', function(e){ if (e.target.tagName === 'IMG') e.preventDefault(); });文档.addEventListener添加事件监听器('dragstart', 函数e){ 如果目标标签名等于'IMG'则调用preventDefault; };
+document.addEventListener添加事件监听器('keydown', function函数(e){文档.addEventListener添加事件监听器('keydown', 函数(e){
+  if (e.key === 'F12'){ e.preventDefault(); return false; }  如果 (e.key === 'F12'){ e.preventDefault(); return false; }
+  if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')){ e.preventDefault(); return false; }  如果 (e.ctrlKey && e.shiftKey && (e.键 === 'I' || e.键 === 'J' || e.键 === 'C')){ e.阻止默认行为(); 返回 假; }
+  if (e.ctrlKey && (e.key === 'u' || e.key === 'U')){ e.preventDefault(); return false; }  如果 (e.ctrlKey && (e.键 === 'u' || e.键 === 'U')){ e.阻止默认行为(); 返回 假; }
 });
 
 })();
@@ -1794,19 +3025,19 @@ document.addEventListener('keydown', function(e){
 
 <script>
 /* PWA Service Worker 注册 */
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js').then(function(reg){
-      reg.onupdatefound = function(){
-        var n = reg.installing;
+if ('serviceWorker' in在 navigator && (location位置.protocol === 'https:' || location位置.hostname === 'localhost' || location位置.hostname === '127.0.0.1')){
+  window.addEventListener添加事件监听器('load', function(){  窗口.addEventListener添加事件监听器('load', 函数(){
+    navigator.serviceWorker.register('sw.js').then然后(function函数(reg){
+      reg.onupdatefound = function函数(){
+        var变量 n = reg.installing;
         if (!n) return;
-        n.onstatechange = function(){
-          if (n.state === 'installed' && navigator.serviceWorker.controller){
+        n.onstatechange = function函数(){
+          if (n.state === 'installed' && navigator.serviceWorkerServiceWorker.controller){
             console.log('[PWA] 新版本已就绪，下次刷新生效');
           }
         };
       };
-    }).catch(function(err){ console.log('[PWA] SW 注册失败：', err); });
+    }).catch(function函数(err){ console.log('[PWA] SW 注册失败：', err); });
   });
 }
 </script>
