@@ -819,7 +819,7 @@ body.theme-transition *::after{
   </div>
 
   <div class="footer">
-    <div class="ver">版本号：3.7.0</div>
+    <div class="ver">版本号：3.7.1</div>
     <div class="coming">敬请期待</div>
   </div>
 </div>
@@ -1455,7 +1455,7 @@ function reportMBTI(res){
     '<div class="report-badge">TEST REPORT</div>' +
     '<div class="report-main-title">' + typeStr + ' · ' + info.tag + '</div>' +
     '<div class="report-subtitle">' + info.line + '</div>' +
-    '<div class="report-tags">' + tagHTML('内向 ' + (eP < 50 ? Math.round(100-eP) : eP) + '%').replace('内向', eP<50?'内向':'内向') + '</div>' +
+    '<div class="report-tags">' + tagHTML((eP < 50 ? '内向 ' + Math.round(100-eP) : '外向 ' + eP) + '%') + '</div>' +
   '</div>';
 
   html += sectionHTML('维度倾向',
